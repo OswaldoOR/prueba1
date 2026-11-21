@@ -36,10 +36,10 @@
           type="button"
           class="storage-pill"
           id="indicador-almacenamiento"
-          title="Estado de sincronización automática con GitHub"
+          title="Clic para vincular sincronización automática entre dispositivos"
         >
           <span class="dot" id="dot-estado-sync"></span>
-          <span id="texto-estado-sync">Conectando...</span>
+          <span id="texto-estado-sync">Modo Local Activo</span>
         </button>
       </div>
     </div>
@@ -131,7 +131,7 @@
         </div>
 
         <form id="form-solicitud" novalidate>
-          <!-- Fila 1 Distribuida: Fecha + Tipo de Servicio -->
+          <!-- Fila 1 Distribuida: Fecha Automática Real + Tipo de Servicio -->
           <div class="form-row-2">
             <div class="form-group">
               <label for="fecha-solicitud">Fecha de Solicitud <span class="req">*</span></label>
@@ -434,16 +434,16 @@
     </div>
   </div>
 
-  <!-- Modal Token de Escritura Automática -->
+  <!-- Modal Token de Sincronización con GitHub -->
   <div class="modal-backdrop oculto" id="modal-sync" role="dialog" aria-modal="true" aria-labelledby="modal-sync-titulo">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 id="modal-sync-titulo">Activar Guardado Automático en la Nube</h3>
+        <h3 id="modal-sync-titulo">Sincronización Automática con GitHub</h3>
         <button type="button" class="btn-close" id="btn-cerrar-sync" aria-label="Cerrar">&times;</button>
       </div>
       <div class="modal-body">
         <p class="sync-help">
-          La lectura ya es automática en todos los navegadores. Pega tu token de GitHub una sola vez para que este navegador también <strong>guarde y actualice</strong> <code>tareas.json</code> automáticamente:
+          Pega tu token de GitHub una sola vez para que este navegador guarde y actualice <strong>tareas.json</strong> automáticamente en todos los dispositivos:
         </p>
 
         <div class="form-row-2" style="margin-bottom: 10px;">
@@ -469,7 +469,7 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" id="btn-cancelar-sync">Cancelar</button>
-        <button type="button" class="btn btn-primary" id="btn-guardar-sync">Activar Auto-Guardado</button>
+        <button type="button" class="btn btn-primary" id="btn-guardar-sync">Guardar y Conectar</button>
       </div>
     </div>
   </div>
