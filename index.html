@@ -36,10 +36,10 @@
           type="button"
           class="storage-pill"
           id="indicador-almacenamiento"
-          title="Clic para vincular sincronización automática entre dispositivos"
+          title="Clic para configurar o compartir sincronización automática"
         >
           <span class="dot" id="dot-estado-sync"></span>
-          <span id="texto-estado-sync">Modo Local Activo</span>
+          <span id="texto-estado-sync">Conectando...</span>
         </button>
       </div>
     </div>
@@ -324,7 +324,7 @@
               <h2 id="titulo-tablero">Historial y Control de Seguimiento</h2>
               <span class="count-pill" id="contador-resultados">0 registros</span>
             </div>
-            <p class="card-subtitle">Consulta, actualiza estados y exporta reportes administrativos con formato</p>
+            <p class="card-subtitle">Consulta, edita, actualiza estados y exporta reportes administrativos</p>
           </div>
           <button type="button" class="btn btn-excel" id="btn-exportar-excel">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1">
@@ -373,7 +373,7 @@
             </svg>
           </div>
           <h3>Bandeja de tareas vacía</h3>
-          <p>No hay solicitudes técnicas registradas todavía. Captura el primer reporte en el formulario de la izquierda.</p>
+          <p>No hay solicitudes técnicas registradas todavía. Captura el primer reporte en el formulario.</p>
         </div>
 
         <!-- Tabla con Scroll Interno y los 7 Campos Obligatorios -->
@@ -406,7 +406,7 @@
     </div>
   </footer>
 
-  <!-- Modal CU-02: Actualizar Estado de Seguimiento -->
+  <!-- Modal 1: Actualizar Estado Rápido -->
   <div class="modal-backdrop oculto" id="modal-estado" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
     <div class="modal-card">
       <div class="modal-header">
@@ -434,16 +434,108 @@
     </div>
   </div>
 
-  <!-- Modal Token de Sincronización con GitHub -->
+  <!-- Modal 2: Modificar / Editar Registro Completo -->
+  <div class="modal-backdrop oculto" id="modal-editar" role="dialog" aria-modal="true" aria-labelledby="modal-editar-titulo">
+    <div class="modal-card modal-card-lg">
+      <div class="modal-header">
+        <h3 id="modal-editar-titulo">Modificar Registro <span id="edit-folio-titulo">#</span></h3>
+        <button type="button" class="btn-close" id="btn-cerrar-editar" aria-label="Cerrar">&times;</button>
+      </div>
+      <form id="form-editar-tarea" novalidate>
+        <div class="modal-body">
+          <div class="form-row-2" style="margin-bottom: 10px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="edit-fecha">Fecha de Solicitud <span class="req">*</span></label>
+              <input type="date" id="edit-fecha" required />
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+              <label>Tipo de Servicio <span class="req">*</span></label>
+              <div class="radio-cards">
+                <label class="radio-option">
+                  <input type="radio" name="editTipoServicio" value="Hardware" />
+                  <span>Hardware</span>
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="editTipoServicio" value="Software" />
+                  <span>Software</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 10px;">
+            <label for="edit-area">Área o Departamento Solicitante <span class="req">*</span></label>
+            <select id="edit-area" required></select>
+          </div>
+
+          <div class="form-group oculto" id="edit-grupo-otra-area" style="margin-bottom: 10px;">
+            <label for="edit-otra-area-texto">Especificar Nombre del Área <span class="req">*</span></label>
+            <input type="text" id="edit-otra-area-texto" placeholder="Nombre del departamento o comisión" />
+          </div>
+
+          <div class="form-row-2" style="margin-bottom: 10px;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="edit-equipo">Equipo Afectado <span class="req">*</span></label>
+              <input type="text" id="edit-equipo" list="sugerencias-equipos" required />
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="edit-estado">Estado de Seguimiento <span class="req">*</span></label>
+              <select id="edit-estado">
+                <option value="Pendiente">Pendiente</option>
+                <option value="En proceso">En proceso</option>
+                <option value="Terminado">Terminado</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="edit-descripcion">Descripción de la Falla y Diagnóstico <span class="req">*</span></label>
+            <textarea id="edit-descripcion" rows="3" required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="btn-cancelar-editar">Cancelar</button>
+          <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 3: Confirmar Eliminación (Compatible 100% con Celular y PC) -->
+  <div class="modal-backdrop oculto" id="modal-eliminar" role="dialog" aria-modal="true" aria-labelledby="modal-eliminar-titulo">
+    <div class="modal-card">
+      <div class="modal-header modal-header-danger">
+        <h3 id="modal-eliminar-titulo">Eliminar Registro <span id="del-id-tarea">#</span></h3>
+        <button type="button" class="btn-close" id="btn-cerrar-eliminar" aria-label="Cerrar">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-info">
+          <p><strong>Área:</strong> <span id="del-area"></span></p>
+          <p><strong>Equipo:</strong> <span id="del-equipo"></span></p>
+        </div>
+        <p class="sync-help" style="margin-bottom: 0;">
+          ¿Seguro que deseas eliminar este registro de forma permanente? Se borrará también de todos los dispositivos sincronizados.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btn-cancelar-eliminar">Cancelar</button>
+        <button type="button" class="btn btn-danger-solid" id="btn-confirmar-eliminar">Sí, Eliminar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Sincronización Automática Multidispositivo -->
   <div class="modal-backdrop oculto" id="modal-sync" role="dialog" aria-modal="true" aria-labelledby="modal-sync-titulo">
     <div class="modal-card">
       <div class="modal-header">
-        <h3 id="modal-sync-titulo">Sincronización Automática con GitHub</h3>
+        <h3 id="modal-sync-titulo">Sincronización Automática en Dispositivos</h3>
         <button type="button" class="btn-close" id="btn-cerrar-sync" aria-label="Cerrar">&times;</button>
       </div>
       <div class="modal-body">
         <p class="sync-help">
-          Pega tu token de GitHub una sola vez para que este navegador guarde y actualice <strong>tareas.json</strong> automáticamente en todos los dispositivos:
+          Conecta tu token una vez o usa los botones rápidos para activar tu celular u otro navegador sin escribir nada:
         </p>
 
         <div class="form-row-2" style="margin-bottom: 10px;">
@@ -457,7 +549,7 @@
           </div>
         </div>
 
-        <div class="form-group" style="margin-bottom: 0;">
+        <div class="form-group" style="margin-bottom: 12px;">
           <label for="sync-token">Token de GitHub (Contents: Read &amp; Write)</label>
           <input
             type="password"
@@ -465,6 +557,18 @@
             placeholder="github_pat_..."
             autocomplete="off"
           />
+        </div>
+
+        <div class="sync-share-box oculto" id="caja-compartir-sync">
+          <p class="sync-share-title">Acceso automático en otros dispositivos:</p>
+          <div class="sync-share-btns">
+            <button type="button" class="btn btn-secondary btn-xs" id="btn-copiar-enlace-sync">
+              Copiar enlace directo p/ Celular
+            </button>
+            <button type="button" class="btn btn-secondary btn-xs" id="btn-copiar-clave-codigo">
+              Copiar clave codificada p/ app.js
+            </button>
+          </div>
         </div>
       </div>
       <div class="modal-footer">
