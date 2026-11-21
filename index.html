@@ -32,10 +32,15 @@
       </div>
 
       <div class="topbar-right">
-        <div class="storage-pill" id="indicador-almacenamiento" title="Almacenamiento local estructurado activo">
-          <span class="dot"></span>
-          <span>Modo Local Activo</span>
-        </div>
+        <button
+          type="button"
+          class="storage-pill"
+          id="indicador-almacenamiento"
+          title="Clic para configurar sincronización automática con GitHub"
+        >
+          <span class="dot" id="dot-estado-sync"></span>
+          <span id="texto-estado-sync">Modo Local (Configurar Sync)</span>
+        </button>
       </div>
     </div>
   </header>
@@ -321,26 +326,15 @@
             </div>
             <p class="card-subtitle">Consulta, actualiza estados y exporta reportes administrativos con formato</p>
           </div>
-
-          <div class="board-actions">
-            <button type="button" class="btn btn-secondary" id="btn-respaldar-json" title="Descargar archivo tareas.json con los registros actuales">
-              Respaldar (.json)
-            </button>
-            <button type="button" class="btn btn-secondary" id="btn-importar-json" title="Cargar archivo .json desde otro dispositivo">
-              Cargar (.json)
-            </button>
-            <input type="file" id="input-importar-json" accept=".json,application/json" class="oculto" />
-
-            <button type="button" class="btn btn-excel" id="btn-exportar-excel">
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="8" y1="13" x2="16" y2="17"></line>
-                <line x1="16" y1="13" x2="8" y2="17"></line>
-              </svg>
-              <span>Exportar a Excel (.xlsx)</span>
-            </button>
-          </div>
+          <button type="button" class="btn btn-excel" id="btn-exportar-excel">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="8" y1="13" x2="16" y2="17"></line>
+              <line x1="16" y1="13" x2="8" y2="17"></line>
+            </svg>
+            <span>Exportar a Excel (.xlsx)</span>
+          </button>
         </div>
 
         <!-- Filtros de Búsqueda -->
@@ -436,6 +430,62 @@
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" id="btn-cancelar-estado">Cancelar</button>
         <button type="button" class="btn btn-primary" id="btn-confirmar-estado">Confirmar Cambio</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Sincronización Automática con GitHub + Respaldo Secundario -->
+  <div class="modal-backdrop oculto" id="modal-sync" role="dialog" aria-modal="true" aria-labelledby="modal-sync-titulo">
+    <div class="modal-card modal-sync-card">
+      <div class="modal-header">
+        <h3 id="modal-sync-titulo">Sincronización Multidispositivo (GitHub)</h3>
+        <button type="button" class="btn-close" id="btn-cerrar-sync" aria-label="Cerrar">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="sync-help">
+          Conecta este navegador una sola vez con tu repositorio para que cada registro o cambio se guarde automáticamente en <strong>tareas.json</strong> y sea visible desde cualquier equipo o celular.
+        </p>
+
+        <div class="form-row-2" style="margin-bottom: 10px;">
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="sync-owner">Usuario GitHub</label>
+            <input type="text" id="sync-owner" placeholder="Ej. oswaldo-dev" />
+          </div>
+          <div class="form-group" style="margin-bottom: 0;">
+            <label for="sync-repo">Nombre del Repositorio</label>
+            <input type="text" id="sync-repo" placeholder="Ej. sistema-sistemas" />
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-bottom: 12px;">
+          <label for="sync-token">Token de GitHub (Fine-grained PAT)</label>
+          <input
+            type="password"
+            id="sync-token"
+            placeholder="github_pat_..."
+            autocomplete="off"
+          />
+          <small class="sync-hint">
+            Permiso requerido en el repo: <strong>Contents &rarr; Read and write</strong>. Se guarda solo en este dispositivo.
+          </small>
+        </div>
+
+        <div class="sync-secondary-box">
+          <span class="sync-secondary-title">Respaldo manual secundario (.json)</span>
+          <div class="sync-secondary-actions">
+            <button type="button" class="btn btn-secondary btn-sm-full" id="btn-respaldar-json">
+              Descargar tareas.json
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm-full" id="btn-importar-json">
+              Cargar tareas.json
+            </button>
+            <input type="file" id="input-importar-json" accept=".json,application/json" class="oculto" />
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btn-forzar-sync">Sincronizar Ahora</button>
+        <button type="button" class="btn btn-primary" id="btn-guardar-sync">Guardar y Conectar</button>
       </div>
     </div>
   </div>
