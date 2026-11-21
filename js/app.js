@@ -4,9 +4,11 @@
  */
 
 const STORAGE_KEY = 'rioblanco_sistemas_tareas_v1';
+const SYNC_CONFIG_KEY = 'rioblanco_github_sync_cfg_v1';
+const ARCHIVO_REMOTO = 'tareas.json';
 
 // =========================================================================
-// 1. CAPA DE PERSISTENCIA
+// 1. CAPA DE PERSISTENCIA LOCAL Y SINCRONIZACIÓN AUTOMÁTICA CON GITHUB
 // =========================================================================
 
 function obtenerTareas() {
@@ -14,28 +16,210 @@ function obtenerTareas() {
     const raw = localStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : [];
   } catch (error) {
-    console.error('Error al leer almacenamiento:', error);
+    console.error('Error al leer almacenamiento local:', error);
     return [];
   }
 }
 
-function guardarTareas(listaTareas) {
+function guardarTareasLocal(listaTareas) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(listaTareas));
 }
 
-async function cargarTareasBaseDesdeGitHub() {
-  try {
-    const respuesta = await fetch('tareas.json', { cache: 'no-store' });
-    if (!respuesta.ok) return;
+function detectarRepoDesdeURL() {
+  const host = window.location.hostname || '';
+  const pathParts = (window.location.pathname || '').split('/').filter(Boolean);
 
-    const datosRemotos = await respuesta.json();
-    if (Array.isArray(datosRemotos) && datosRemotos.length > 0) {
-      tareas = datosRemotos;
-      guardarTareas(tareas);
-    }
-  } catch (error) {
-    console.warn('No se pudo leer tareas.json (normal si abres el HTML directo sin servidor):', error);
+  if (host.endsWith('.github.io')) {
+    const owner = host.replace('.github.io', '');
+    const repo = pathParts.length > 0 ? pathParts[0] : `${owner}.github.io`;
+    return { owner, repo };
   }
+  return { owner: '', repo: '' };
+}
+
+function obtenerConfigSync() {
+  const auto = detectarRepoDesdeURL();
+  try {
+    const raw = localStorage.getItem(SYNC_CONFIG_KEY);
+    const guardada = raw ? JSON.parse(raw) : {};
+    return {
+      owner: (guardada.owner || auto.owner || '').trim(),
+      repo: (guardada.repo || auto.repo || '').trim(),
+      token: (guardada.token || '').trim()
+    };
+  } catch (e) {
+    return { owner: auto.owner, repo: auto.repo, token: '' };
+  }
+}
+
+function guardarConfigSync(cfg) {
+  localStorage.setItem(SYNC_CONFIG_KEY, JSON.stringify(cfg));
+}
+
+function actualizarIndicadorSync(estado, texto) {
+  const dot = document.getElementById('dot-estado-sync');
+  const label = document.getElementById('texto-estado-sync');
+  if (!dot || !label) return;
+
+  dot.classList.remove('online', 'syncing', 'error');
+  if (estado === 'online') dot.classList.add('online');
+  if (estado === 'syncing') dot.classList.add('syncing');
+  if (estado === 'error') dot.classList.add('error');
+
+  label.textContent = texto;
+}
+
+function utf8ToBase64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let binString = '';
+  bytes.forEach((b) => {
+    binString += String.fromCharCode(b);
+  });
+  return btoa(binString);
+}
+
+function base64ToUtf8(base64) {
+  const clean = base64.replace(/\s/g, '');
+  const binString = atob(clean);
+  const bytes = Uint8Array.from(binString, (c) => c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
+let colaGuardadoRemoto = Promise.resolve();
+
+async function subirTareasAGitHub(listaTareas, notificarExito = false) {
+  const cfg = obtenerConfigSync();
+  if (!cfg.owner || !cfg.repo || !cfg.token) {
+    actualizarIndicadorSync('local', 'Modo Local (Configurar Sync)');
+    return false;
+  }
+
+  actualizarIndicadorSync('syncing', 'Guardando en GitHub...');
+
+  const endpoint = `https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/${ARCHIVO_REMOTO}`;
+  const headers = {
+    Authorization: `Bearer ${cfg.token}`,
+    Accept: 'application/vnd.github+json',
+    'Content-Type': 'application/json'
+  };
+
+  try {
+    // 1. Obtener SHA actual del archivo tareas.json en GitHub
+    let shaActual = null;
+    const resGet = await fetch(`${endpoint}?t=${Date.now()}`, {
+      headers,
+      cache: 'no-store'
+    });
+
+    if (resGet.ok) {
+      const infoArchivo = await resGet.json();
+      shaActual = infoArchivo.sha;
+    } else if (resGet.status !== 404) {
+      throw new Error(`Error al consultar repositorio (${resGet.status})`);
+    }
+
+    // 2. Subir el arreglo actualizado a tareas.json
+    const contenidoJSON = JSON.stringify(listaTareas, null, 2);
+    const body = {
+      message: `Actualización de tareas (${listaTareas.length} registros)`,
+      content: utf8ToBase64(contenidoJSON)
+    };
+    if (shaActual) body.sha = shaActual;
+
+    const resPut = await fetch(endpoint, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(body)
+    });
+
+    if (!resPut.ok) {
+      const detalle = await resPut.json().catch(() => ({}));
+      throw new Error(detalle.message || `Error HTTP ${resPut.status}`);
+    }
+
+    actualizarIndicadorSync('online', 'Sincronizado con GitHub');
+    if (notificarExito) {
+      mostrarNotificacion('Datos sincronizados con GitHub correctamente.', 'success');
+    }
+    return true;
+  } catch (error) {
+    console.error('Error al sincronizar hacia GitHub:', error);
+    actualizarIndicadorSync('error', 'Error de Sync (Clic aquí)');
+    mostrarNotificacion(
+      `No se pudo guardar en GitHub: ${error.message}. Revisa tu token.`,
+      'error'
+    );
+    return false;
+  }
+}
+
+async function sincronizarDesdeGitHub(mostrarAviso = false) {
+  const cfg = obtenerConfigSync();
+
+  // Intento 1: Leer directo desde la API de GitHub (sin caché de CDN)
+  if (cfg.owner && cfg.repo) {
+    actualizarIndicadorSync('syncing', 'Sincronizando...');
+    const endpoint = `https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/${ARCHIVO_REMOTO}?t=${Date.now()}`;
+    const headers = { Accept: 'application/vnd.github+json' };
+    if (cfg.token) headers.Authorization = `Bearer ${cfg.token}`;
+
+    try {
+      const res = await fetch(endpoint, { headers, cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        const texto = base64ToUtf8(data.content || '');
+        const listaRemota = JSON.parse(texto);
+
+        if (Array.isArray(listaRemota)) {
+          tareas = listaRemota;
+          guardarTareasLocal(tareas);
+          renderizarTablero();
+
+          if (cfg.token) {
+            actualizarIndicadorSync('online', 'Sincronizado con GitHub');
+          } else {
+            actualizarIndicadorSync('local', 'Lectura GitHub (Sin Token)');
+          }
+
+          if (mostrarAviso) {
+            mostrarNotificacion(
+              `Sincronizado: ${tareas.length} registros cargados desde GitHub.`,
+              'success'
+            );
+          }
+          return true;
+        }
+      }
+    } catch (error) {
+      console.warn('Fallo lectura vía API GitHub, intentando archivo estático:', error);
+    }
+  }
+
+  // Intento 2: Leer el archivo estático tareas.json publicado en GitHub Pages
+  try {
+    const resStatic = await fetch(`${ARCHIVO_REMOTO}?t=${Date.now()}`, { cache: 'no-store' });
+    if (resStatic.ok) {
+      const listaEstatica = await resStatic.json();
+      if (Array.isArray(listaEstatica) && listaEstatica.length > 0) {
+        tareas = listaEstatica;
+        guardarTareasLocal(tareas);
+        renderizarTablero();
+      }
+    }
+  } catch (e) {
+    // Si se abre con doble clic local (file://), conserva localStorage
+  }
+
+  actualizarIndicadorSync(
+    cfg.token ? 'online' : 'local',
+    cfg.token ? 'Sincronizado con GitHub' : 'Modo Local (Configurar Sync)'
+  );
+  return false;
+}
+
+function guardarTareas(listaTareas) {
+  guardarTareasLocal(listaTareas);
+  colaGuardadoRemoto = colaGuardadoRemoto.then(() => subirTareasAGitHub(listaTareas, false));
 }
 
 // =========================================================================
@@ -65,6 +249,11 @@ const filtroTipo = document.getElementById('filtro-tipo');
 
 const modalEstado = document.getElementById('modal-estado');
 const selectNuevoEstado = document.getElementById('select-nuevo-estado');
+
+const modalSync = document.getElementById('modal-sync');
+const inputSyncOwner = document.getElementById('sync-owner');
+const inputSyncRepo = document.getElementById('sync-repo');
+const inputSyncToken = document.getElementById('sync-token');
 
 // =========================================================================
 // 3. UTILIDADES DE FECHA, ID Y NOTIFICACIONES
@@ -370,12 +559,6 @@ modalEstado.addEventListener('click', (e) => {
   if (e.target === modalEstado) cerrarModalEstado();
 });
 
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && !modalEstado.classList.contains('oculto')) {
-    cerrarModalEstado();
-  }
-});
-
 document.getElementById('btn-confirmar-estado').addEventListener('click', () => {
   if (idTareaEnEdicion === null) return;
 
@@ -472,7 +655,6 @@ function exportarHistorialAExcel() {
       }
     };
 
-    // Construcción de matriz de celdas para Hoja 1: Historial_Tareas
     const filas = [
       [
         { v: 'H. AYUNTAMIENTO CONSTITUCIONAL DE RÍO BLANCO, VERACRUZ', s: estiloTitulo },
@@ -574,7 +756,6 @@ function exportarHistorialAExcel() {
         { v: t.Estado_Seguimiento, t: 's', s: estiloEstado }
       ]);
 
-      // Calcular altura dinámica según longitud de descripción
       const lineasEstimadas = Math.max(
         1,
         Math.ceil((t.Descripcion_Falla || '').length / 48)
@@ -582,7 +763,6 @@ function exportarHistorialAExcel() {
       alturasFilas.push({ hpt: Math.max(22, lineasEstimadas * 15 + 6) });
     });
 
-    // Fila de cierre / total
     const estiloPie = {
       font: { name: 'Calibri', sz: 10, bold: true, color: { rgb: '003B75' } },
       fill: { patternType: 'solid', fgColor: { rgb: 'EEF6FF' } },
@@ -608,7 +788,6 @@ function exportarHistorialAExcel() {
 
     const hojaHistorial = XLSX.utils.aoa_to_sheet(filas);
 
-    // Combinar celdas de encabezados y pie
     const filaFinalIdx = filas.length - 1;
     hojaHistorial['!merges'] = [
       { s: { r: 0, c: 0 }, e: { r: 0, c: 6 } },
@@ -617,22 +796,18 @@ function exportarHistorialAExcel() {
       { s: { r: filaFinalIdx, c: 0 }, e: { r: filaFinalIdx, c: 6 } }
     ];
 
-    // Anchos de columna y alturas de fila
     hojaHistorial['!cols'] = [
-      { wch: 11 }, // ID_Tarea
-      { wch: 16 }, // Fecha_Solicitud
-      { wch: 30 }, // Area_Solicitante
-      { wch: 24 }, // Equipo_Afectado
-      { wch: 15 }, // Tipo_Servicio
-      { wch: 52 }, // Descripcion_Falla
-      { wch: 19 }  // Estado_Seguimiento
+      { wch: 11 },
+      { wch: 16 },
+      { wch: 30 },
+      { wch: 24 },
+      { wch: 15 },
+      { wch: 52 },
+      { wch: 19 }
     ];
     hojaHistorial['!rows'] = alturasFilas;
-
-    // Activar autofiltro en la tabla principal
     hojaHistorial['!autofilter'] = { ref: `A5:G${5 + total}` };
 
-    // Hoja 2: Resumen Estadístico por Estado, Tipo y Departamento
     const hardwareCount = datosOrdenados.filter((t) => t.Tipo_Servicio === 'Hardware').length;
     const softwareCount = datosOrdenados.filter((t) => t.Tipo_Servicio === 'Software').length;
 
@@ -742,13 +917,72 @@ function exportarHistorialAExcel() {
 document.getElementById('btn-exportar-excel').addEventListener('click', exportarHistorialAExcel);
 
 // =========================================================================
-// 8. ARRANQUE INICIAL
+// 8. MODAL DE SINCRONIZACIÓN GITHUB Y RESPALDO SECUNDARIO JSON
 // =========================================================================
 
-// =========================================================================
-// 8. RESPALDO JSON Y ARRANQUE INICIAL
-// =========================================================================
+function abrirModalSync() {
+  const cfg = obtenerConfigSync();
+  inputSyncOwner.value = cfg.owner;
+  inputSyncRepo.value = cfg.repo;
+  inputSyncToken.value = cfg.token;
+  modalSync.classList.remove('oculto');
+}
 
+function cerrarModalSync() {
+  modalSync.classList.add('oculto');
+}
+
+document.getElementById('indicador-almacenamiento').addEventListener('click', abrirModalSync);
+document.getElementById('btn-cerrar-sync').addEventListener('click', cerrarModalSync);
+
+modalSync.addEventListener('click', (e) => {
+  if (e.target === modalSync) cerrarModalSync();
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    if (!modalEstado.classList.contains('oculto')) cerrarModalEstado();
+    if (!modalSync.classList.contains('oculto')) cerrarModalSync();
+  }
+});
+
+document.getElementById('btn-guardar-sync').addEventListener('click', async () => {
+  const owner = inputSyncOwner.value.trim();
+  const repo = inputSyncRepo.value.trim();
+  const token = inputSyncToken.value.trim();
+
+  if (!owner || !repo) {
+    mostrarNotificacion('Ingresa tu usuario de GitHub y el nombre del repositorio.', 'error');
+    return;
+  }
+
+  guardarConfigSync({ owner, repo, token });
+  cerrarModalSync();
+
+  if (token) {
+    // Si este dispositivo ya tiene registros locales y GitHub está vacío, los sube; si no, descarga de GitHub
+    if (tareas.length > 0) {
+      await subirTareasAGitHub(tareas, true);
+    } else {
+      await sincronizarDesdeGitHub(true);
+    }
+  } else {
+    await sincronizarDesdeGitHub(true);
+  }
+});
+
+document.getElementById('btn-forzar-sync').addEventListener('click', async () => {
+  const owner = inputSyncOwner.value.trim();
+  const repo = inputSyncRepo.value.trim();
+  const token = inputSyncToken.value.trim();
+  if (owner && repo) {
+    guardarConfigSync({ owner, repo, token });
+  }
+  cerrarModalSync();
+  await sincronizarDesdeGitHub(true);
+});
+
+// Respaldo manual secundario (.json)
 document.getElementById('btn-respaldar-json').addEventListener('click', () => {
   if (tareas.length === 0) {
     mostrarNotificacion('No hay registros para respaldar.', 'error');
@@ -765,7 +999,7 @@ document.getElementById('btn-respaldar-json').addEventListener('click', () => {
   enlace.click();
 
   URL.revokeObjectURL(url);
-  mostrarNotificacion('Archivo tareas.json descargado correctamente.', 'success');
+  mostrarNotificacion('Archivo tareas.json descargado.', 'success');
 });
 
 const inputImportarJson = document.getElementById('input-importar-json');
@@ -783,12 +1017,13 @@ inputImportarJson.addEventListener('change', (e) => {
     try {
       const datosImportados = JSON.parse(evento.target.result);
       if (!Array.isArray(datosImportados)) {
-        throw new Error('El archivo no contiene una lista válida de tareas.');
+        throw new Error('Formato inválido');
       }
 
       tareas = datosImportados;
       guardarTareas(tareas);
       renderizarTablero();
+      cerrarModalSync();
       mostrarNotificacion(`Se cargaron ${tareas.length} registros correctamente.`, 'success');
     } catch (error) {
       mostrarNotificacion('El archivo seleccionado no es un respaldo .json válido.', 'error');
@@ -799,11 +1034,19 @@ inputImportarJson.addEventListener('change', (e) => {
   lector.readAsText(archivo);
 });
 
+// =========================================================================
+// 9. ARRANQUE INICIAL Y AUTO-ACTUALIZACIÓN ENTRE PESTAÑAS/DISPOSITIVOS
+// =========================================================================
+
 document.addEventListener('DOMContentLoaded', async () => {
   tareas = obtenerTareas();
-  if (tareas.length === 0) {
-    await cargarTareasBaseDesdeGitHub();
-  }
   inicializarFormulario();
   renderizarTablero();
+  await sincronizarDesdeGitHub(false);
+});
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    sincronizarDesdeGitHub(false);
+  }
 });
