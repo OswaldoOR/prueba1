@@ -664,6 +664,21 @@ textarea:focus {
   border-color: #93c5fd;
 }
 
+.btn-danger-solid {
+  background: var(--error-color);
+  color: #ffffff;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.25);
+}
+
+.btn-danger-solid:hover {
+  background: #b91c1c;
+}
+
+.btn-xs {
+  padding: 6px 10px;
+  font-size: 0.76rem;
+}
+
 .btn-excel {
   background: var(--excel-green);
   color: #ffffff;
@@ -721,12 +736,12 @@ textarea:focus {
   color: var(--blue-deep);
   font-weight: 700;
   text-align: left;
-  padding: 10px 12px;
+  padding: 10px 11px;
   white-space: nowrap;
 }
 
 .tasks-table td {
-  padding: 9px 12px;
+  padding: 9px 11px;
   border-bottom: 1px solid var(--border-light);
   vertical-align: middle;
   background: #ffffff;
@@ -746,7 +761,7 @@ textarea:focus {
 }
 
 .col-desc {
-  max-width: 290px;
+  max-width: 260px;
   white-space: pre-wrap;
   word-break: break-word;
   line-height: 1.38;
@@ -774,13 +789,13 @@ textarea:focus {
 
 .action-btns {
   display: flex;
-  gap: 6px;
+  gap: 5px;
   white-space: nowrap;
 }
 
 .btn-sm {
-  padding: 5px 10px;
-  font-size: 0.76rem;
+  padding: 5px 8px;
+  font-size: 0.75rem;
   border-radius: 6px;
   border: 1px solid #bfdbfe;
   background: var(--blue-tint);
@@ -793,6 +808,16 @@ textarea:focus {
 .btn-sm:hover {
   background: var(--blue-tint-hover);
   border-color: #93c5fd;
+}
+
+.btn-sm.btn-edit {
+  background: #ffffff;
+  color: var(--blue-primary);
+  border-color: #93c5fd;
+}
+
+.btn-sm.btn-edit:hover {
+  background: var(--blue-tint);
 }
 
 .btn-sm.btn-danger {
@@ -870,17 +895,22 @@ textarea:focus {
   place-items: center;
   padding: 16px;
   z-index: 100;
+  overflow-y: auto;
 }
 
 .modal-card {
   background: #ffffff;
   width: 100%;
-  max-width: 440px;
+  max-width: 450px;
   border-radius: var(--radius);
   box-shadow: 0 20px 40px rgba(0, 35, 75, 0.28);
   overflow: hidden;
   border: 1px solid var(--border-light);
   animation: modalIn 0.16s ease-out;
+}
+
+.modal-card-lg {
+  max-width: 540px;
 }
 
 @keyframes modalIn {
@@ -896,6 +926,11 @@ textarea:focus {
   background: var(--blue-primary);
   border-bottom: 3px solid var(--blue-bright);
   color: #ffffff;
+}
+
+.modal-header.modal-header-danger {
+  background: #991b1b;
+  border-bottom-color: var(--error-color);
 }
 
 .modal-header h3 {
@@ -934,6 +969,26 @@ textarea:focus {
   color: var(--text-body);
   margin-bottom: 12px;
   line-height: 1.42;
+}
+
+.sync-share-box {
+  background: var(--bg-surface-soft);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.sync-share-title {
+  font-size: 0.77rem;
+  font-weight: 700;
+  color: var(--blue-deep);
+  margin-bottom: 8px;
+}
+
+.sync-share-btns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
 }
 
 .modal-footer {
@@ -1017,7 +1072,8 @@ textarea:focus {
     justify-content: center;
   }
 
-  .form-row-2 {
+  .form-row-2,
+  .sync-share-btns {
     grid-template-columns: 1fr;
   }
 
@@ -1106,8 +1162,13 @@ textarea:focus {
   .action-btns {
     width: 100%;
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 7px;
+  }
+
+  .action-btns .btn-sm {
+    padding: 8px 6px;
+    font-size: 0.78rem;
   }
 
   .gov-footer-content {
