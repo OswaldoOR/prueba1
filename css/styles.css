@@ -163,15 +163,27 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  background: rgba(0, 28, 62, 0.68);
+  background: rgba(0, 28, 62, 0.72);
   backdrop-filter: blur(6px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.34);
   padding: 7px 14px;
   border-radius: 999px;
   font-size: 0.78rem;
   font-weight: 600;
+  font-family: inherit;
   color: #ffffff;
   white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, transform 0.1s;
+}
+
+.storage-pill:hover {
+  background: rgba(0, 42, 92, 0.9);
+  border-color: rgba(255, 255, 255, 0.65);
+}
+
+.storage-pill:active {
+  transform: translateY(1px);
 }
 
 .storage-pill .dot {
@@ -180,6 +192,22 @@ body {
   border-radius: 50%;
   background: #38bdf8;
   box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.3);
+  transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.storage-pill .dot.online {
+  background: #10b981;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.32);
+}
+
+.storage-pill .dot.syncing {
+  background: #facc15;
+  box-shadow: 0 0 0 3px rgba(250, 204, 21, 0.35);
+}
+
+.storage-pill .dot.error {
+  background: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.35);
 }
 
 /* =========================================================================
@@ -492,6 +520,7 @@ body {
 }
 
 input[type="text"],
+input[type="password"],
 input[type="date"],
 input[type="search"],
 select,
@@ -854,6 +883,10 @@ textarea:focus {
   animation: modalIn 0.16s ease-out;
 }
 
+.modal-sync-card {
+  max-width: 480px;
+}
+
 @keyframes modalIn {
   from { opacity: 0; transform: scale(0.96); }
   to { opacity: 1; transform: scale(1); }
@@ -898,6 +931,48 @@ textarea:focus {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.sync-help {
+  font-size: 0.82rem;
+  color: var(--text-body);
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.sync-hint {
+  display: block;
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.sync-secondary-box {
+  background: var(--bg-surface-soft);
+  border: 1px dashed var(--border-color);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+
+.sync-secondary-title {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 8px;
+}
+
+.sync-secondary-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.btn-sm-full {
+  padding: 7px 10px;
+  font-size: 0.79rem;
 }
 
 .modal-footer {
@@ -1077,26 +1152,5 @@ textarea:focus {
   .gov-footer-content {
     flex-direction: column;
     text-align: center;
-  }
-}
-
-/* Botones de respaldo y exportación en el tablero */
-.board-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-@media (max-width: 768px) {
-  .board-actions {
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .board-actions .btn-excel {
-    grid-column: 1 / -1;
-    width: 100%;
   }
 }
