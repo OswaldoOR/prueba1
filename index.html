@@ -36,10 +36,10 @@
           type="button"
           class="storage-pill"
           id="indicador-almacenamiento"
-          title="Clic para configurar sincronización automática con GitHub"
+          title="Estado de sincronización automática con GitHub"
         >
           <span class="dot" id="dot-estado-sync"></span>
-          <span id="texto-estado-sync">Modo Local (Configurar Sync)</span>
+          <span id="texto-estado-sync">Conectando...</span>
         </button>
       </div>
     </div>
@@ -434,58 +434,42 @@
     </div>
   </div>
 
-  <!-- Modal Sincronización Automática con GitHub + Respaldo Secundario -->
+  <!-- Modal Token de Escritura Automática -->
   <div class="modal-backdrop oculto" id="modal-sync" role="dialog" aria-modal="true" aria-labelledby="modal-sync-titulo">
-    <div class="modal-card modal-sync-card">
+    <div class="modal-card">
       <div class="modal-header">
-        <h3 id="modal-sync-titulo">Sincronización Multidispositivo (GitHub)</h3>
+        <h3 id="modal-sync-titulo">Activar Guardado Automático en la Nube</h3>
         <button type="button" class="btn-close" id="btn-cerrar-sync" aria-label="Cerrar">&times;</button>
       </div>
       <div class="modal-body">
         <p class="sync-help">
-          Conecta este navegador una sola vez con tu repositorio para que cada registro o cambio se guarde automáticamente en <strong>tareas.json</strong> y sea visible desde cualquier equipo o celular.
+          La lectura ya es automática en todos los navegadores. Pega tu token de GitHub una sola vez para que este navegador también <strong>guarde y actualice</strong> <code>tareas.json</code> automáticamente:
         </p>
 
         <div class="form-row-2" style="margin-bottom: 10px;">
           <div class="form-group" style="margin-bottom: 0;">
             <label for="sync-owner">Usuario GitHub</label>
-            <input type="text" id="sync-owner" placeholder="Ej. oswaldo-dev" />
+            <input type="text" id="sync-owner" placeholder="Usuario" />
           </div>
           <div class="form-group" style="margin-bottom: 0;">
-            <label for="sync-repo">Nombre del Repositorio</label>
-            <input type="text" id="sync-repo" placeholder="Ej. sistema-sistemas" />
+            <label for="sync-repo">Repositorio</label>
+            <input type="text" id="sync-repo" placeholder="Repositorio" />
           </div>
         </div>
 
-        <div class="form-group" style="margin-bottom: 12px;">
-          <label for="sync-token">Token de GitHub (Fine-grained PAT)</label>
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="sync-token">Token de GitHub (Contents: Read &amp; Write)</label>
           <input
             type="password"
             id="sync-token"
             placeholder="github_pat_..."
             autocomplete="off"
           />
-          <small class="sync-hint">
-            Permiso requerido en el repo: <strong>Contents &rarr; Read and write</strong>. Se guarda solo en este dispositivo.
-          </small>
-        </div>
-
-        <div class="sync-secondary-box">
-          <span class="sync-secondary-title">Respaldo manual secundario (.json)</span>
-          <div class="sync-secondary-actions">
-            <button type="button" class="btn btn-secondary btn-sm-full" id="btn-respaldar-json">
-              Descargar tareas.json
-            </button>
-            <button type="button" class="btn btn-secondary btn-sm-full" id="btn-importar-json">
-              Cargar tareas.json
-            </button>
-            <input type="file" id="input-importar-json" accept=".json,application/json" class="oculto" />
-          </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" id="btn-forzar-sync">Sincronizar Ahora</button>
-        <button type="button" class="btn btn-primary" id="btn-guardar-sync">Guardar y Conectar</button>
+        <button type="button" class="btn btn-secondary" id="btn-cancelar-sync">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btn-guardar-sync">Activar Auto-Guardado</button>
       </div>
     </div>
   </div>
