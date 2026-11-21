@@ -9,13 +9,45 @@ const ARCHIVO_REMOTO = 'tareas.json';
 const INTERVALO_AUTO_SYNC_MS = 10000;
 
 // =========================================================================
-// 1. PERSISTENCIA LOCAL SEGURA + SINCRONIZACIÓN AUTOMÁTICA CON GITHUB
+// CONFIGURACIÓN GLOBAL AUTOMÁTICA (PARA NO ESCRIBIR EL TOKEN EN CADA EQUIPO)
+// =========================================================================
+// Cuando configures tu token en la página y pulses "Copiar clave codificada p/ app.js",
+// pega el resultado dentro de tokenCodificado para que TODOS los celulares y navegadores
+// funcionen solos sin pedir token ni enlace especial.
+const GITHUB_GLOBAL_CONFIG = {
+  owner: 'OswaldoOR',
+  repo: 'prueba1',
+  tokenCodificado: ''
+};
+
+// =========================================================================
+// 1. PERSISTENCIA LOCAL + SINCRONIZACIÓN AUTOMÁTICA CON GITHUB
 // =========================================================================
 
 let ultimoShaRemoto = null;
 let sincronizandoAhora = false;
 let subiendoAhora = false;
+let versionLocal = 0;
 let colaGuardadoRemoto = Promise.resolve();
+
+function codificarTokenSeguro(tokenPlano) {
+  const limpio = (tokenPlano || '').trim();
+  if (!limpio) return '';
+  return btoa(limpio.split('').reverse().join(''));
+}
+
+function decodificarTokenSeguro(codificado) {
+  const limpio = (codificado || '').trim();
+  if (!limpio) return '';
+  if (limpio.startsWith('github_pat_') || limpio.startsWith('ghp_')) {
+    return limpio;
+  }
+  try {
+    return atob(limpio).split('').reverse().join('');
+  } catch (e) {
+    return '';
+  }
+}
 
 function detectarRepoDesdeURL() {
   const host = window.location.hostname || '';
@@ -37,9 +69,9 @@ function capturarTokenDesdeURL() {
       const auto = detectarRepoDesdeURL();
       const actual = obtenerConfigSync();
       guardarConfigSync({
-        owner: actual.owner || auto.owner,
-        repo: actual.repo || auto.repo,
-        token: tokenUrl.trim()
+        owner: actual.owner || auto.owner || GITHUB_GLOBAL_CONFIG.owner,
+        repo: actual.repo || auto.repo || GITHUB_GLOBAL_CONFIG.repo,
+        token: decodificarTokenSeguro(tokenUrl.trim()) || tokenUrl.trim()
       });
       params.delete('token');
       const nuevaUrl =
@@ -55,16 +87,22 @@ function capturarTokenDesdeURL() {
 
 function obtenerConfigSync() {
   const auto = detectarRepoDesdeURL();
+  const tokenGlobal = decodificarTokenSeguro(GITHUB_GLOBAL_CONFIG.tokenCodificado);
+
   try {
     const raw = localStorage.getItem(SYNC_CONFIG_KEY);
     const guardada = raw ? JSON.parse(raw) : {};
     return {
-      owner: (guardada.owner || auto.owner || '').trim(),
-      repo: (guardada.repo || auto.repo || '').trim(),
-      token: (guardada.token || '').trim()
+      owner: (guardada.owner || auto.owner || GITHUB_GLOBAL_CONFIG.owner || '').trim(),
+      repo: (guardada.repo || auto.repo || GITHUB_GLOBAL_CONFIG.repo || '').trim(),
+      token: (guardada.token || tokenGlobal || '').trim()
     };
   } catch (e) {
-    return { owner: auto.owner, repo: auto.repo, token: '' };
+    return {
+      owner: auto.owner || GITHUB_GLOBAL_CONFIG.owner,
+      repo: auto.repo || GITHUB_GLOBAL_CONFIG.repo,
+      token: tokenGlobal
+    };
   }
 }
 
@@ -122,7 +160,11 @@ function base64ToUtf8(base64) {
 async function subirTareasAGitHub(listaTareas, reintento = 0) {
   const cfg = obtenerConfigSync();
   if (!cfg.owner || !cfg.repo || !cfg.token) {
-    actualizarIndicadorSync('local', 'Modo Local (Clic p/ Sync Nube)');
+    actualizarIndicadorSync('local', 'Solo lectura (Clic p/ activar Sync)');
+    mostrarNotificacion(
+      'Este navegador aún no tiene permiso de escritura. Haz clic arriba en "Solo lectura" para vincularlo.',
+      'error'
+    );
     return false;
   }
 
@@ -199,12 +241,17 @@ async function sincronizarDesdeGitHub(silencioso = true) {
   }
 
   sincronizandoAhora = true;
+  const versionAlIniciar = versionLocal;
   const endpoint = `https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/${ARCHIVO_REMOTO}?t=${Date.now()}`;
   const headers = { Accept: 'application/vnd.github+json' };
   if (cfg.token) headers.Authorization = `Bearer ${cfg.token}`;
 
   try {
     const res = await fetch(endpoint, { headers, cache: 'no-store' });
+
+    // Si hubo un cambio local mientras se descargaba, ignorar la respuesta vieja
+    if (versionLocal !== versionAlIniciar || subiendoAhora) return;
+
     if (res.ok) {
       const data = await res.json();
 
@@ -213,8 +260,6 @@ async function sincronizarDesdeGitHub(silencioso = true) {
         const listaRemota = JSON.parse(texto);
 
         if (Array.isArray(listaRemota)) {
-          // Si este navegador no tiene token de escritura y ya tiene registros locales
-          // mientras tareas.json remoto sigue vacío ([]), NO sobrescribir ni borrar lo local.
           const remotoVacioConDatosLocales =
             !cfg.token && listaRemota.length === 0 && tareas.length > 0;
 
@@ -229,7 +274,7 @@ async function sincronizarDesdeGitHub(silencioso = true) {
 
       actualizarIndicadorSync(
         cfg.token ? 'online' : 'local',
-        cfg.token ? 'Sincronizado con GitHub' : 'Modo Local (Clic p/ Sync Nube)'
+        cfg.token ? 'Sincronizado con GitHub' : 'Solo lectura (Clic p/ activar Sync)'
       );
 
       if (!silencioso) {
@@ -238,7 +283,7 @@ async function sincronizarDesdeGitHub(silencioso = true) {
     } else {
       actualizarIndicadorSync(
         cfg.token ? 'online' : 'local',
-        cfg.token ? 'Sincronizado con GitHub' : 'Modo Local Activo'
+        cfg.token ? 'Sincronizado con GitHub' : 'Solo lectura (Clic p/ activar Sync)'
       );
     }
   } catch (error) {
@@ -250,8 +295,10 @@ async function sincronizarDesdeGitHub(silencioso = true) {
 }
 
 function guardarTareas(listaTareas) {
+  versionLocal += 1;
   guardarTareasLocal(listaTareas);
-  colaGuardadoRemoto = colaGuardadoRemoto.then(() => subirTareasAGitHub(listaTareas));
+  const copiaInstantanea = JSON.parse(JSON.stringify(listaTareas));
+  colaGuardadoRemoto = colaGuardadoRemoto.then(() => subirTareasAGitHub(copiaInstantanea));
 }
 
 // =========================================================================
@@ -260,6 +307,8 @@ function guardarTareas(listaTareas) {
 
 let tareas = [];
 let idTareaEnEdicion = null;
+let idTareaModificando = null;
+let idTareaEliminando = null;
 let fechaActualStr = '';
 
 const formSolicitud = document.getElementById('form-solicitud');
@@ -283,10 +332,23 @@ const filtroTipo = document.getElementById('filtro-tipo');
 const modalEstado = document.getElementById('modal-estado');
 const selectNuevoEstado = document.getElementById('select-nuevo-estado');
 
+const modalEditar = document.getElementById('modal-editar');
+const formEditarTarea = document.getElementById('form-editar-tarea');
+const editFecha = document.getElementById('edit-fecha');
+const editArea = document.getElementById('edit-area');
+const editGrupoOtraArea = document.getElementById('edit-grupo-otra-area');
+const editOtraAreaTexto = document.getElementById('edit-otra-area-texto');
+const editEquipo = document.getElementById('edit-equipo');
+const editEstado = document.getElementById('edit-estado');
+const editDescripcion = document.getElementById('edit-descripcion');
+
+const modalEliminar = document.getElementById('modal-eliminar');
+
 const modalSync = document.getElementById('modal-sync');
 const inputSyncOwner = document.getElementById('sync-owner');
 const inputSyncRepo = document.getElementById('sync-repo');
 const inputSyncToken = document.getElementById('sync-token');
+const cajaCompartirSync = document.getElementById('caja-compartir-sync');
 
 // =========================================================================
 // 3. UTILIDADES DE FECHA REAL AUTOMÁTICA, ID Y NOTIFICACIONES
@@ -304,6 +366,15 @@ function formatearFechaDDMMAAAA(fechaISO) {
   if (!fechaISO || !fechaISO.includes('-')) return fechaISO;
   const [yyyy, mm, dd] = fechaISO.split('-');
   return `${dd}/${mm}/${yyyy}`;
+}
+
+function formatearFechaISO(fechaDDMMAAAA) {
+  if (!fechaDDMMAAAA) return obtenerFechaHoyISO();
+  if (fechaDDMMAAAA.includes('-')) return fechaDDMMAAAA;
+  const partes = fechaDDMMAAAA.split('/');
+  if (partes.length !== 3) return obtenerFechaHoyISO();
+  const [dd, mm, yyyy] = partes;
+  return `${yyyy}-${mm.padStart(2, '0')}-${dd.padStart(2, '0')}`;
 }
 
 function calcularSiguienteID() {
@@ -339,7 +410,7 @@ function mostrarNotificacion(mensaje, tipo = 'info', accionTexto = null, accionC
 }
 
 // =========================================================================
-// 4. LÓGICA DEL FORMULARIO Y VALIDACIONES (CU-01 / RF-01 a RF-05)
+// 4. LÓGICA DEL FORMULARIO DE ALTA Y VALIDACIONES
 // =========================================================================
 
 function inicializarFormulario() {
@@ -463,7 +534,7 @@ function resetearFormulario() {
 document.getElementById('btn-limpiar').addEventListener('click', resetearFormulario);
 
 // =========================================================================
-// 5. RENDERIZADO DEL TABLERO, MÉTRICAS Y FILTROS (RF-06)
+// 5. RENDERIZADO DEL TABLERO, MÉTRICAS Y FILTROS
 // =========================================================================
 
 function actualizarKPIs() {
@@ -554,10 +625,13 @@ function renderizarTablero() {
         </td>
         <td data-label="Acciones">
           <div class="action-btns">
+            <button type="button" class="btn-sm btn-edit" onclick="abrirModalEditar(${tarea.ID_Tarea})">
+              Editar
+            </button>
             <button type="button" class="btn-sm" onclick="abrirModalEstado(${tarea.ID_Tarea})">
               Estado
             </button>
-            <button type="button" class="btn-sm btn-danger" onclick="eliminarRegistro(${tarea.ID_Tarea})" title="Depurar registro de prueba">
+            <button type="button" class="btn-sm btn-danger" onclick="abrirModalEliminar(${tarea.ID_Tarea})">
               Eliminar
             </button>
           </div>
@@ -573,14 +647,15 @@ filtroEstado.addEventListener('change', renderizarTablero);
 filtroTipo.addEventListener('change', renderizarTablero);
 
 // =========================================================================
-// 6. ACTUALIZACIÓN DE ESTADOS Y DEPURACIÓN (CU-02 / RF-07 / RNF-06)
+// 6. MODALES: EDITAR REGISTRO COMPLETO, ESTADO RÁPIDO Y ELIMINAR
 // =========================================================================
 
+// --- A. Modal de Estado Rápido ---
 window.abrirModalEstado = function (idTarea) {
-  const tarea = tareas.find((t) => t.ID_Tarea === idTarea);
+  const tarea = tareas.find((t) => Number(t.ID_Tarea) === Number(idTarea));
   if (!tarea) return;
 
-  idTareaEnEdicion = idTarea;
+  idTareaEnEdicion = Number(tarea.ID_Tarea);
   document.getElementById('modal-id-tarea').textContent = `#${tarea.ID_Tarea}`;
   document.getElementById('modal-area').textContent = tarea.Area_Solicitante;
   document.getElementById('modal-equipo').textContent = tarea.Equipo_Afectado;
@@ -596,7 +671,6 @@ function cerrarModalEstado() {
 
 document.getElementById('btn-cerrar-modal').addEventListener('click', cerrarModalEstado);
 document.getElementById('btn-cancelar-estado').addEventListener('click', cerrarModalEstado);
-
 modalEstado.addEventListener('click', (e) => {
   if (e.target === modalEstado) cerrarModalEstado();
 });
@@ -608,7 +682,7 @@ document.getElementById('btn-confirmar-estado').addEventListener('click', () => 
   const permitidos = ['Pendiente', 'En proceso', 'Terminado'];
   if (!permitidos.includes(nuevoEstado)) return;
 
-  const indice = tareas.findIndex((t) => t.ID_Tarea === idTareaEnEdicion);
+  const indice = tareas.findIndex((t) => Number(t.ID_Tarea) === idTareaEnEdicion);
   if (indice !== -1) {
     tareas[indice].Estado_Seguimiento = nuevoEstado;
     guardarTareas(tareas);
@@ -622,20 +696,138 @@ document.getElementById('btn-confirmar-estado').addEventListener('click', () => 
   cerrarModalEstado();
 });
 
-window.eliminarRegistro = function (idTarea) {
-  const confirmar = window.confirm(
-    `¿Deseas eliminar el registro #${idTarea}? Esta acción es para depuración y no se puede deshacer.`
-  );
-  if (!confirmar) return;
+// --- B. Modal de Edición / Modificación Completa ---
+function poblarSelectAreaEdicion() {
+  editArea.innerHTML = selectArea.innerHTML;
+}
 
-  tareas = tareas.filter((t) => t.ID_Tarea !== idTarea);
-  guardarTareas(tareas);
-  renderizarTablero();
-  mostrarNotificacion(`Registro #${idTarea} eliminado.`, 'info');
+editArea.addEventListener('change', () => {
+  if (editArea.value === 'OTRA') {
+    editGrupoOtraArea.classList.remove('oculto');
+    editOtraAreaTexto.focus();
+  } else {
+    editGrupoOtraArea.classList.add('oculto');
+    editOtraAreaTexto.value = '';
+  }
+});
+
+window.abrirModalEditar = function (idTarea) {
+  const tarea = tareas.find((t) => Number(t.ID_Tarea) === Number(idTarea));
+  if (!tarea) return;
+
+  idTareaModificando = Number(tarea.ID_Tarea);
+  document.getElementById('edit-folio-titulo').textContent = `#${tarea.ID_Tarea}`;
+
+  editFecha.value = formatearFechaISO(tarea.Fecha_Solicitud);
+  editEquipo.value = tarea.Equipo_Afectado || '';
+  editEstado.value = tarea.Estado_Seguimiento || 'Pendiente';
+  editDescripcion.value = tarea.Descripcion_Falla || '';
+
+  const radioTipo = document.querySelector(
+    `input[name="editTipoServicio"][value="${tarea.Tipo_Servicio}"]`
+  );
+  if (radioTipo) radioTipo.checked = true;
+
+  const existeEnLista = Array.from(editArea.options).some(
+    (opt) => opt.value === tarea.Area_Solicitante && opt.value !== 'OTRA'
+  );
+
+  if (existeEnLista) {
+    editArea.value = tarea.Area_Solicitante;
+    editGrupoOtraArea.classList.add('oculto');
+    editOtraAreaTexto.value = '';
+  } else {
+    editArea.value = 'OTRA';
+    editGrupoOtraArea.classList.remove('oculto');
+    editOtraAreaTexto.value = tarea.Area_Solicitante || '';
+  }
+
+  modalEditar.classList.remove('oculto');
 };
 
+function cerrarModalEditar() {
+  idTareaModificando = null;
+  modalEditar.classList.add('oculto');
+}
+
+document.getElementById('btn-cerrar-editar').addEventListener('click', cerrarModalEditar);
+document.getElementById('btn-cancelar-editar').addEventListener('click', cerrarModalEditar);
+modalEditar.addEventListener('click', (e) => {
+  if (e.target === modalEditar) cerrarModalEditar();
+});
+
+formEditarTarea.addEventListener('submit', (e) => {
+  e.preventDefault();
+  if (idTareaModificando === null) return;
+
+  const areaFinal =
+    editArea.value === 'OTRA' ? editOtraAreaTexto.value.trim() : editArea.value;
+  const equipoFinal = editEquipo.value.trim();
+  const descripcionFinal = editDescripcion.value.trim();
+  const tipoRadio = document.querySelector('input[name="editTipoServicio"]:checked');
+
+  if (!editFecha.value || !areaFinal || !equipoFinal || !descripcionFinal || !tipoRadio) {
+    mostrarNotificacion('Completa todos los campos antes de guardar cambios.', 'error');
+    return;
+  }
+
+  const indice = tareas.findIndex((t) => Number(t.ID_Tarea) === idTareaModificando);
+  if (indice !== -1) {
+    tareas[indice] = {
+      ...tareas[indice],
+      Fecha_Solicitud: formatearFechaDDMMAAAA(editFecha.value),
+      Area_Solicitante: areaFinal,
+      Equipo_Afectado: equipoFinal,
+      Tipo_Servicio: tipoRadio.value,
+      Descripcion_Falla: descripcionFinal,
+      Estado_Seguimiento: editEstado.value
+    };
+
+    guardarTareas(tareas);
+    renderizarTablero();
+    mostrarNotificacion(`Registro #${idTareaModificando} modificado correctamente.`, 'success');
+  }
+
+  cerrarModalEditar();
+});
+
+// --- C. Modal de Eliminación (Compatible con iPhone y Android) ---
+window.abrirModalEliminar = function (idTarea) {
+  const tarea = tareas.find((t) => Number(t.ID_Tarea) === Number(idTarea));
+  if (!tarea) return;
+
+  idTareaEliminando = Number(tarea.ID_Tarea);
+  document.getElementById('del-id-tarea').textContent = `#${tarea.ID_Tarea}`;
+  document.getElementById('del-area').textContent = tarea.Area_Solicitante;
+  document.getElementById('del-equipo').textContent = tarea.Equipo_Afectado;
+
+  modalEliminar.classList.remove('oculto');
+};
+
+function cerrarModalEliminar() {
+  idTareaEliminando = null;
+  modalEliminar.classList.add('oculto');
+}
+
+document.getElementById('btn-cerrar-eliminar').addEventListener('click', cerrarModalEliminar);
+document.getElementById('btn-cancelar-eliminar').addEventListener('click', cerrarModalEliminar);
+modalEliminar.addEventListener('click', (e) => {
+  if (e.target === modalEliminar) cerrarModalEliminar();
+});
+
+document.getElementById('btn-confirmar-eliminar').addEventListener('click', () => {
+  if (idTareaEliminando === null) return;
+
+  const folioEliminado = idTareaEliminando;
+  tareas = tareas.filter((t) => Number(t.ID_Tarea) !== folioEliminado);
+  guardarTareas(tareas);
+  renderizarTablero();
+  cerrarModalEliminar();
+  mostrarNotificacion(`Registro #${folioEliminado} eliminado.`, 'info');
+});
+
 // =========================================================================
-// 7. GENERADOR DE EXCEL .XLSX CON FORMATO INSTITUCIONAL (CU-03 / RF-08)
+// 7. GENERADOR DE EXCEL .XLSX CON FORMATO INSTITUCIONAL
 // =========================================================================
 
 function exportarHistorialAExcel() {
@@ -959,14 +1151,24 @@ function exportarHistorialAExcel() {
 document.getElementById('btn-exportar-excel').addEventListener('click', exportarHistorialAExcel);
 
 // =========================================================================
-// 8. CONFIGURACIÓN DEL TOKEN DE GITHUB
+// 8. CONFIGURACIÓN Y ENLACE RÁPIDO PARA OTROS DISPOSITIVOS
 // =========================================================================
+
+function actualizarVisibilidadCompartir() {
+  const tokenActual = inputSyncToken.value.trim();
+  if (tokenActual) {
+    cajaCompartirSync.classList.remove('oculto');
+  } else {
+    cajaCompartirSync.classList.add('oculto');
+  }
+}
 
 function abrirModalSync() {
   const cfg = obtenerConfigSync();
   inputSyncOwner.value = cfg.owner;
   inputSyncRepo.value = cfg.repo;
   inputSyncToken.value = cfg.token;
+  actualizarVisibilidadCompartir();
   modalSync.classList.remove('oculto');
 }
 
@@ -974,6 +1176,7 @@ function cerrarModalSync() {
   modalSync.classList.add('oculto');
 }
 
+inputSyncToken.addEventListener('input', actualizarVisibilidadCompartir);
 document.getElementById('indicador-almacenamiento').addEventListener('click', abrirModalSync);
 document.getElementById('btn-cerrar-sync').addEventListener('click', cerrarModalSync);
 document.getElementById('btn-cancelar-sync').addEventListener('click', cerrarModalSync);
@@ -985,7 +1188,37 @@ modalSync.addEventListener('click', (e) => {
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     if (!modalEstado.classList.contains('oculto')) cerrarModalEstado();
+    if (!modalEditar.classList.contains('oculto')) cerrarModalEditar();
+    if (!modalEliminar.classList.contains('oculto')) cerrarModalEliminar();
     if (!modalSync.classList.contains('oculto')) cerrarModalSync();
+  }
+});
+
+document.getElementById('btn-copiar-enlace-sync').addEventListener('click', async () => {
+  const tokenPlano = inputSyncToken.value.trim();
+  if (!tokenPlano) return;
+
+  const base = `${window.location.origin}${window.location.pathname}`;
+  const enlace = `${base}?token=${encodeURIComponent(codificarTokenSeguro(tokenPlano))}`;
+
+  try {
+    await navigator.clipboard.writeText(enlace);
+    mostrarNotificacion('Enlace copiado. Ábrelo una vez en tu celular y quedará listo.', 'success');
+  } catch (e) {
+    window.prompt('Copia este enlace y ábrelo en tu celular:', enlace);
+  }
+});
+
+document.getElementById('btn-copiar-clave-codigo').addEventListener('click', async () => {
+  const tokenPlano = inputSyncToken.value.trim();
+  if (!tokenPlano) return;
+
+  const codificado = codificarTokenSeguro(tokenPlano);
+  try {
+    await navigator.clipboard.writeText(codificado);
+    mostrarNotificacion('Clave codificada copiada. Pégala en tokenCodificado dentro de app.js.', 'success');
+  } catch (e) {
+    window.prompt('Copia esta clave codificada para js/app.js:', codificado);
   }
 });
 
@@ -1005,7 +1238,7 @@ document.getElementById('btn-guardar-sync').addEventListener('click', async () =
   if (token) {
     if (tareas.length > 0) {
       await subirTareasAGitHub(tareas);
-      mostrarNotificacion('Datos locales subidos y sincronizados con GitHub.', 'success');
+      mostrarNotificacion('Sincronizado con GitHub correctamente.', 'success');
     } else {
       await sincronizarDesdeGitHub(false);
     }
@@ -1020,6 +1253,7 @@ document.getElementById('btn-guardar-sync').addEventListener('click', async () =
 
 document.addEventListener('DOMContentLoaded', async () => {
   capturarTokenDesdeURL();
+  poblarSelectAreaEdicion();
   tareas = obtenerTareasLocal();
   inicializarFormulario();
   renderizarTablero();
