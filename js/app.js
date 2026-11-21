@@ -6,14 +6,15 @@
 const STORAGE_KEY = 'rioblanco_sistemas_tareas_v1';
 const SYNC_CONFIG_KEY = 'rioblanco_github_sync_cfg_v1';
 const ARCHIVO_REMOTO = 'tareas.json';
-const INTERVALO_AUTO_SYNC_MS = 8000;
+const INTERVALO_AUTO_SYNC_MS = 10000;
 
 // =========================================================================
-// 1. PERSISTENCIA AUTOMÁTICA MULTIDISPOSITIVO CON GITHUB (tareas.json)
+// 1. PERSISTENCIA LOCAL SEGURA + SINCRONIZACIÓN AUTOMÁTICA CON GITHUB
 // =========================================================================
 
 let ultimoShaRemoto = null;
 let sincronizandoAhora = false;
+let subiendoAhora = false;
 let colaGuardadoRemoto = Promise.resolve();
 
 function detectarRepoDesdeURL() {
@@ -48,7 +49,7 @@ function capturarTokenDesdeURL() {
       window.history.replaceState({}, '', nuevaUrl);
     }
   } catch (e) {
-    // Ignorar si no hay parámetros
+    // Ignorar si no hay parámetros en URL
   }
 }
 
@@ -87,7 +88,8 @@ function actualizarIndicadorSync(estado, texto) {
 function obtenerTareasLocal() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed : [];
   } catch (error) {
     console.error('Error al leer almacenamiento local:', error);
     return [];
@@ -101,27 +103,31 @@ function guardarTareasLocal(listaTareas) {
 function utf8ToBase64(str) {
   const bytes = new TextEncoder().encode(str);
   let binString = '';
-  bytes.forEach((b) => {
-    binString += String.fromCharCode(b);
-  });
+  for (let i = 0; i < bytes.length; i += 1) {
+    binString += String.fromCharCode(bytes[i]);
+  }
   return btoa(binString);
 }
 
 function base64ToUtf8(base64) {
   const clean = base64.replace(/\s/g, '');
   const binString = atob(clean);
-  const bytes = Uint8Array.from(binString, (c) => c.charCodeAt(0));
+  const bytes = new Uint8Array(binString.length);
+  for (let i = 0; i < binString.length; i += 1) {
+    bytes[i] = binString.charCodeAt(i);
+  }
   return new TextDecoder().decode(bytes);
 }
 
 async function subirTareasAGitHub(listaTareas, reintento = 0) {
   const cfg = obtenerConfigSync();
   if (!cfg.owner || !cfg.repo || !cfg.token) {
-    actualizarIndicadorSync('local', 'Solo lectura (Clic p/ activar guardado)');
+    actualizarIndicadorSync('local', 'Modo Local (Clic p/ Sync Nube)');
     return false;
   }
 
-  actualizarIndicadorSync('syncing', 'Guardando...');
+  subiendoAhora = true;
+  actualizarIndicadorSync('syncing', 'Guardando en GitHub...');
 
   const endpoint = `https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/${ARCHIVO_REMOTO}`;
   const headers = {
@@ -131,7 +137,6 @@ async function subirTareasAGitHub(listaTareas, reintento = 0) {
   };
 
   try {
-    // Obtener SHA actual más reciente de tareas.json
     let shaActual = null;
     const resGet = await fetch(`${endpoint}?t=${Date.now()}`, {
       headers,
@@ -158,7 +163,6 @@ async function subirTareasAGitHub(listaTareas, reintento = 0) {
       body: JSON.stringify(body)
     });
 
-    // Si otro navegador guardó al mismo tiempo (409 Conflict), reintentar automáticamente
     if (resPut.status === 409 && reintento < 2) {
       return subirTareasAGitHub(listaTareas, reintento + 1);
     }
@@ -173,22 +177,24 @@ async function subirTareasAGitHub(listaTareas, reintento = 0) {
       ultimoShaRemoto = respuestaPut.content.sha;
     }
 
-    actualizarIndicadorSync('online', 'Auto-Sync Activo');
+    actualizarIndicadorSync('online', 'Sincronizado con GitHub');
     return true;
   } catch (error) {
     console.error('Error al guardar en GitHub:', error);
-    actualizarIndicadorSync('error', 'Error al guardar (Clic aquí)');
-    mostrarNotificacion(`Error al sincronizar: ${error.message}`, 'error');
+    actualizarIndicadorSync('error', 'Error Sync (Clic p/ revisar)');
+    mostrarNotificacion(`Error al subir a GitHub: ${error.message}`, 'error');
     return false;
+  } finally {
+    subiendoAhora = false;
   }
 }
 
 async function sincronizarDesdeGitHub(silencioso = true) {
-  if (sincronizandoAhora) return;
+  if (sincronizandoAhora || subiendoAhora) return;
   const cfg = obtenerConfigSync();
 
   if (!cfg.owner || !cfg.repo) {
-    actualizarIndicadorSync('local', 'Modo Local');
+    actualizarIndicadorSync('local', 'Modo Local Activo');
     return;
   }
 
@@ -202,30 +208,42 @@ async function sincronizarDesdeGitHub(silencioso = true) {
     if (res.ok) {
       const data = await res.json();
 
-      // Solo actualizar si el archivo remoto cambió respecto a lo que ya tenemos en pantalla
       if (data.sha && data.sha !== ultimoShaRemoto) {
         const texto = base64ToUtf8(data.content || '');
         const listaRemota = JSON.parse(texto);
 
         if (Array.isArray(listaRemota)) {
-          ultimoShaRemoto = data.sha;
-          tareas = listaRemota;
-          guardarTareasLocal(tareas);
-          renderizarTablero();
+          // Si este navegador no tiene token de escritura y ya tiene registros locales
+          // mientras tareas.json remoto sigue vacío ([]), NO sobrescribir ni borrar lo local.
+          const remotoVacioConDatosLocales =
+            !cfg.token && listaRemota.length === 0 && tareas.length > 0;
+
+          if (!remotoVacioConDatosLocales) {
+            ultimoShaRemoto = data.sha;
+            tareas = listaRemota;
+            guardarTareasLocal(tareas);
+            renderizarTablero();
+          }
         }
       }
 
       actualizarIndicadorSync(
         cfg.token ? 'online' : 'local',
-        cfg.token ? 'Auto-Sync Activo' : 'Lectura Auto (Clic p/ guardar)'
+        cfg.token ? 'Sincronizado con GitHub' : 'Modo Local (Clic p/ Sync Nube)'
       );
 
       if (!silencioso) {
-        mostrarNotificacion('Sincronización automática activa.', 'success');
+        mostrarNotificacion('Conexión con GitHub verificada.', 'success');
       }
+    } else {
+      actualizarIndicadorSync(
+        cfg.token ? 'online' : 'local',
+        cfg.token ? 'Sincronizado con GitHub' : 'Modo Local Activo'
+      );
     }
   } catch (error) {
     console.warn('No se pudo consultar GitHub en este ciclo:', error);
+    actualizarIndicadorSync('local', 'Modo Local Activo');
   } finally {
     sincronizandoAhora = false;
   }
@@ -242,6 +260,7 @@ function guardarTareas(listaTareas) {
 
 let tareas = [];
 let idTareaEnEdicion = null;
+let fechaActualStr = '';
 
 const formSolicitud = document.getElementById('form-solicitud');
 const inputFecha = document.getElementById('fecha-solicitud');
@@ -270,14 +289,14 @@ const inputSyncRepo = document.getElementById('sync-repo');
 const inputSyncToken = document.getElementById('sync-token');
 
 // =========================================================================
-// 3. UTILIDADES DE FECHA, ID Y NOTIFICACIONES
+// 3. UTILIDADES DE FECHA REAL AUTOMÁTICA, ID Y NOTIFICACIONES
 // =========================================================================
 
 function obtenerFechaHoyISO() {
-  const hoy = new Date();
-  const yyyy = hoy.getFullYear();
-  const mm = String(hoy.getMonth() + 1).padStart(2, '0');
-  const dd = String(hoy.getDate()).padStart(2, '0');
+  const ahora = new Date();
+  const yyyy = ahora.getFullYear();
+  const mm = String(ahora.getMonth() + 1).padStart(2, '0');
+  const dd = String(ahora.getDate()).padStart(2, '0');
   return `${yyyy}-${mm}-${dd}`;
 }
 
@@ -324,8 +343,17 @@ function mostrarNotificacion(mensaje, tipo = 'info', accionTexto = null, accionC
 // =========================================================================
 
 function inicializarFormulario() {
-  inputFecha.value = obtenerFechaHoyISO();
+  fechaActualStr = obtenerFechaHoyISO();
+  inputFecha.value = fechaActualStr;
   previewId.textContent = `#${calcularSiguienteID()}`;
+}
+
+function verificarCambioDeDiaAutomatico() {
+  const hoy = obtenerFechaHoyISO();
+  if (hoy !== fechaActualStr) {
+    fechaActualStr = hoy;
+    inputFecha.value = hoy;
+  }
 }
 
 selectArea.addEventListener('change', () => {
@@ -364,8 +392,7 @@ function validarFormulario() {
   let esValido = true;
 
   if (!inputFecha.value) {
-    marcarErrorCampo(inputFecha);
-    esValido = false;
+    inputFecha.value = obtenerFechaHoyISO();
   }
 
   if (!selectArea.value) {
@@ -403,13 +430,14 @@ formSolicitud.addEventListener('submit', (e) => {
     return;
   }
 
+  const fechaISO = inputFecha.value || obtenerFechaHoyISO();
   const areaFinal =
     selectArea.value === 'OTRA' ? inputOtraArea.value.trim() : selectArea.value;
   const tipoServicio = document.querySelector('input[name="tipoServicio"]:checked').value;
 
   const nuevaTarea = {
     ID_Tarea: calcularSiguienteID(),
-    Fecha_Solicitud: formatearFechaDDMMAAAA(inputFecha.value),
+    Fecha_Solicitud: formatearFechaDDMMAAAA(fechaISO),
     Area_Solicitante: areaFinal,
     Equipo_Afectado: inputEquipo.value.trim(),
     Tipo_Servicio: tipoServicio,
@@ -931,7 +959,7 @@ function exportarHistorialAExcel() {
 document.getElementById('btn-exportar-excel').addEventListener('click', exportarHistorialAExcel);
 
 // =========================================================================
-// 8. ACTIVACIÓN DE TOKEN DE ESCRITURA (ÚNICA VEZ)
+// 8. CONFIGURACIÓN DEL TOKEN DE GITHUB
 // =========================================================================
 
 function abrirModalSync() {
@@ -974,15 +1002,20 @@ document.getElementById('btn-guardar-sync').addEventListener('click', async () =
   guardarConfigSync({ owner, repo, token });
   cerrarModalSync();
 
-  if (token && tareas.length > 0 && !ultimoShaRemoto) {
-    await subirTareasAGitHub(tareas);
+  if (token) {
+    if (tareas.length > 0) {
+      await subirTareasAGitHub(tareas);
+      mostrarNotificacion('Datos locales subidos y sincronizados con GitHub.', 'success');
+    } else {
+      await sincronizarDesdeGitHub(false);
+    }
   } else {
     await sincronizarDesdeGitHub(false);
   }
 });
 
 // =========================================================================
-// 9. ARRANQUE Y ACTUALIZACIÓN AUTOMÁTICA EN SEGUNDO PLANO
+// 9. ARRANQUE INICIAL Y ACTUALIZACIÓN EN SEGUNDO PLANO
 // =========================================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -993,17 +1026,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   await sincronizarDesdeGitHub(true);
 
-  // Revisar cambios automáticamente cada 8 segundos si la pestaña está abierta
   setInterval(() => {
+    verificarCambioDeDiaAutomatico();
     if (document.visibilityState === 'visible') {
       sincronizarDesdeGitHub(true);
     }
   }, INTERVALO_AUTO_SYNC_MS);
 });
 
-// Actualizar al instante al abrir la app o volver a la pestaña en cualquier navegador
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') {
+    verificarCambioDeDiaAutomatico();
     sincronizarDesdeGitHub(true);
   }
 });
