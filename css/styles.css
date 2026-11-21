@@ -875,16 +875,12 @@ textarea:focus {
 .modal-card {
   background: #ffffff;
   width: 100%;
-  max-width: 430px;
+  max-width: 440px;
   border-radius: var(--radius);
   box-shadow: 0 20px 40px rgba(0, 35, 75, 0.28);
   overflow: hidden;
   border: 1px solid var(--border-light);
   animation: modalIn 0.16s ease-out;
-}
-
-.modal-sync-card {
-  max-width: 480px;
 }
 
 @keyframes modalIn {
@@ -934,45 +930,10 @@ textarea:focus {
 }
 
 .sync-help {
-  font-size: 0.82rem;
+  font-size: 0.83rem;
   color: var(--text-body);
   margin-bottom: 12px;
-  line-height: 1.4;
-}
-
-.sync-hint {
-  display: block;
-  font-size: 0.74rem;
-  color: var(--text-muted);
-  margin-top: 4px;
-}
-
-.sync-secondary-box {
-  background: var(--bg-surface-soft);
-  border: 1px dashed var(--border-color);
-  border-radius: 8px;
-  padding: 10px 12px;
-}
-
-.sync-secondary-title {
-  display: block;
-  font-size: 0.75rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  margin-bottom: 8px;
-}
-
-.sync-secondary-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.btn-sm-full {
-  padding: 7px 10px;
-  font-size: 0.79rem;
+  line-height: 1.42;
 }
 
 .modal-footer {
