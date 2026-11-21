@@ -745,8 +745,65 @@ document.getElementById('btn-exportar-excel').addEventListener('click', exportar
 // 8. ARRANQUE INICIAL
 // =========================================================================
 
-document.addEventListener('DOMContentLoaded', () => {
+// =========================================================================
+// 8. RESPALDO JSON Y ARRANQUE INICIAL
+// =========================================================================
+
+document.getElementById('btn-respaldar-json').addEventListener('click', () => {
+  if (tareas.length === 0) {
+    mostrarNotificacion('No hay registros para respaldar.', 'error');
+    return;
+  }
+
+  const contenido = JSON.stringify(tareas, null, 2);
+  const blob = new Blob([contenido], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+
+  const enlace = document.createElement('a');
+  enlace.href = url;
+  enlace.download = 'tareas.json';
+  enlace.click();
+
+  URL.revokeObjectURL(url);
+  mostrarNotificacion('Archivo tareas.json descargado correctamente.', 'success');
+});
+
+const inputImportarJson = document.getElementById('input-importar-json');
+
+document.getElementById('btn-importar-json').addEventListener('click', () => {
+  inputImportarJson.click();
+});
+
+inputImportarJson.addEventListener('change', (e) => {
+  const archivo = e.target.files[0];
+  if (!archivo) return;
+
+  const lector = new FileReader();
+  lector.onload = (evento) => {
+    try {
+      const datosImportados = JSON.parse(evento.target.result);
+      if (!Array.isArray(datosImportados)) {
+        throw new Error('El archivo no contiene una lista válida de tareas.');
+      }
+
+      tareas = datosImportados;
+      guardarTareas(tareas);
+      renderizarTablero();
+      mostrarNotificacion(`Se cargaron ${tareas.length} registros correctamente.`, 'success');
+    } catch (error) {
+      mostrarNotificacion('El archivo seleccionado no es un respaldo .json válido.', 'error');
+    } finally {
+      inputImportarJson.value = '';
+    }
+  };
+  lector.readAsText(archivo);
+});
+
+document.addEventListener('DOMContentLoaded', async () => {
   tareas = obtenerTareas();
+  if (tareas.length === 0) {
+    await cargarTareasBaseDesdeGitHub();
+  }
   inicializarFormulario();
   renderizarTablero();
 });
