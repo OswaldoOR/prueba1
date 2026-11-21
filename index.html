@@ -321,15 +321,26 @@
             </div>
             <p class="card-subtitle">Consulta, actualiza estados y exporta reportes administrativos con formato</p>
           </div>
-          <button type="button" class="btn btn-excel" id="btn-exportar-excel">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1">
-              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-              <polyline points="14 2 14 8 20 8"></polyline>
-              <line x1="8" y1="13" x2="16" y2="17"></line>
-              <line x1="16" y1="13" x2="8" y2="17"></line>
-            </svg>
-            <span>Exportar a Excel (.xlsx)</span>
-          </button>
+
+          <div class="board-actions">
+            <button type="button" class="btn btn-secondary" id="btn-respaldar-json" title="Descargar archivo tareas.json con los registros actuales">
+              Respaldar (.json)
+            </button>
+            <button type="button" class="btn btn-secondary" id="btn-importar-json" title="Cargar archivo .json desde otro dispositivo">
+              Cargar (.json)
+            </button>
+            <input type="file" id="input-importar-json" accept=".json,application/json" class="oculto" />
+
+            <button type="button" class="btn btn-excel" id="btn-exportar-excel">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="8" y1="13" x2="16" y2="17"></line>
+                <line x1="16" y1="13" x2="8" y2="17"></line>
+              </svg>
+              <span>Exportar a Excel (.xlsx)</span>
+            </button>
+          </div>
         </div>
 
         <!-- Filtros de Búsqueda -->
