@@ -1079,3 +1079,24 @@ textarea:focus {
     text-align: center;
   }
 }
+
+/* Botones de respaldo y exportación en el tablero */
+.board-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .board-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .board-actions .btn-excel {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}
