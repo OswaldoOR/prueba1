@@ -9,15 +9,6 @@
     "Estado_Seguimiento": "Pendiente"
   },
   {
-    "ID_Tarea": 4,
-    "Fecha_Solicitud": "21/11/2026",
-    "Area_Solicitante": "Ameyal",
-    "Equipo_Afectado": "Cableado de red",
-    "Tipo_Servicio": "Hardware",
-    "Descripcion_Falla": "si por favor",
-    "Estado_Seguimiento": "Terminado"
-  },
-  {
     "ID_Tarea": 3,
     "Fecha_Solicitud": "01/11/2026",
     "Area_Solicitante": "Contabilidad",
