@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#003b75" />
+  <title>Sistema de Control | Depto. Sistemas</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="img/logo.png" />
+  <link rel="icon" type="image/png" sizes="64x64" href="img/logo.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="img/logo.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="img/logo.png" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <!-- Librería compatible con SheetJS con soporte completo de estilos para Excel (.xlsx) -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+</head>
+<body>
+  <!-- Encabezado Institucional Compacto con Fondo (leonazul.jpg) y Escudo (leon.png) -->
+  <header class="topbar">
+    <div class="container topbar-content">
+      <div class="brand">
+        <div class="brand-badge">
+          <img src="img/leon.png" alt="Escudo H. Ayuntamiento de Río Blanco" />
+        </div>
+        <div class="brand-text">
+          <div class="brand-topline">
+            <span class="brand-kicker">H. Ayuntamiento Constitucional de Río Blanco, Ver.</span>
+            <span class="brand-sep">&bull;</span>
+            <span class="brand-dept">Departamento de Sistemas</span>
+          </div>
+          <h1>Sistema de Control y Seguimiento de Tareas Técnicas</h1>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="storage-pill" id="indicador-almacenamiento" title="Almacenamiento local estructurado activo">
+          <span class="dot"></span>
+          <span>Modo Local Activo</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Contenedor Principal (Pantalla Única) -->
+  <main class="container main-layout">
+    <!-- Barra Horizontal de Métricas Rápidas -->
+    <section class="kpi-grid" aria-label="Resumen de solicitudes">
+      <article class="kpi-card">
+        <div class="kpi-left">
+          <div class="kpi-icon icon-total" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1">
+              <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"></path>
+              <rect x="9" y="3" width="6" height="4" rx="1"></rect>
+              <line x1="9" y1="12" x2="15" y2="12"></line>
+              <line x1="9" y1="16" x2="13" y2="16"></line>
+            </svg>
+          </div>
+          <div class="kpi-info">
+            <span class="kpi-label">Total Registradas</span>
+            <small class="kpi-hint">Historial general</small>
+          </div>
+        </div>
+        <strong class="kpi-value" id="kpi-total">0</strong>
+      </article>
+
+      <article class="kpi-card kpi-pendiente">
+        <div class="kpi-left">
+          <div class="kpi-icon icon-pendiente" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+          <div class="kpi-info">
+            <span class="kpi-label">Pendientes</span>
+            <small class="kpi-hint">Por atender</small>
+          </div>
+        </div>
+        <strong class="kpi-value" id="kpi-pendiente">0</strong>
+      </article>
+
+      <article class="kpi-card kpi-proceso">
+        <div class="kpi-left">
+          <div class="kpi-icon icon-proceso" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1">
+              <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+            </svg>
+          </div>
+          <div class="kpi-info">
+            <span class="kpi-label">En Proceso</span>
+            <small class="kpi-hint">En diagnóstico</small>
+          </div>
+        </div>
+        <strong class="kpi-value" id="kpi-proceso">0</strong>
+      </article>
+
+      <article class="kpi-card kpi-terminado">
+        <div class="kpi-left">
+          <div class="kpi-icon icon-terminado" aria-hidden="true">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+          </div>
+          <div class="kpi-info">
+            <span class="kpi-label">Terminadas</span>
+            <small class="kpi-hint">Atendidas</small>
+          </div>
+        </div>
+        <strong class="kpi-value" id="kpi-terminado">0</strong>
+      </article>
+    </section>
+
+    <!-- Zona de Trabajo Distribuida: Formulario (Izquierda) + Tablero (Derecha) -->
+    <div class="workspace-grid">
+      <!-- CU-01: Formulario de Registro -->
+      <section class="card form-card" aria-labelledby="titulo-formulario">
+        <div class="card-header">
+          <div>
+            <h2 id="titulo-formulario">Nueva Solicitud Técnica</h2>
+            <p class="card-subtitle">Captura digital de soporte a departamentos</p>
+          </div>
+          <div class="auto-meta">
+            <span class="meta-chip">Folio: <strong id="preview-id">#1</strong></span>
+            <span class="badge badge-pendiente">Pendiente</span>
+          </div>
+        </div>
+
+        <form id="form-solicitud" novalidate>
+          <!-- Fila 1 Distribuida: Fecha + Tipo de Servicio -->
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="fecha-solicitud">Fecha de Solicitud <span class="req">*</span></label>
+              <input type="date" id="fecha-solicitud" name="fechaSolicitud" required />
+              <small class="error-msg" id="err-fecha">Selecciona una fecha válida.</small>
+            </div>
+
+            <div class="form-group" id="grupo-tipo-servicio">
+              <label>Tipo de Servicio <span class="req">*</span></label>
+              <div class="radio-cards">
+                <label class="radio-option">
+                  <input type="radio" name="tipoServicio" value="Hardware" />
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect>
+                    <line x1="8" y1="21" x2="16" y2="21"></line>
+                    <line x1="12" y1="17" x2="12" y2="21"></line>
+                  </svg>
+                  <span>Hardware</span>
+                </label>
+                <label class="radio-option">
+                  <input type="radio" name="tipoServicio" value="Software" />
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <polyline points="16 18 22 12 16 6"></polyline>
+                    <polyline points="8 6 2 12 8 18"></polyline>
+                  </svg>
+                  <span>Software</span>
+                </label>
+              </div>
+              <small class="error-msg" id="err-tipo">Elige Hardware o Software.</small>
+            </div>
+          </div>
+
+          <!-- Fila 2: Área Solicitante -->
+          <div class="form-group">
+            <label for="area-solicitante">Área o Departamento Solicitante <span class="req">*</span></label>
+            <select id="area-solicitante" name="areaSolicitante" required>
+              <option value="">-- Selecciona un departamento --</option>
+
+              <optgroup label="Gobierno y Cabildo">
+                <option value="Presidencia">Presidencia</option>
+                <option value="Secretaría (Secretario)">Secretaría (Secretario)</option>
+                <option value="Sindicatura (Síndico)">Sindicatura (Síndico)</option>
+                <option value="Jurídico">Jurídico</option>
+                <option value="Gobernación">Gobernación</option>
+                <option value="Área Cabildo">Área Cabildo</option>
+                <option value="Regidurías Recepción">Regidurías Recepción</option>
+                <option value="Regiduría 1">Regiduría 1</option>
+                <option value="Regiduría 2">Regiduría 2</option>
+                <option value="Regiduría 3">Regiduría 3</option>
+                <option value="Regiduría 4">Regiduría 4</option>
+                <option value="Regiduría 5">Regiduría 5</option>
+                <option value="Regiduría 6">Regiduría 6</option>
+              </optgroup>
+
+              <optgroup label="Finanzas y Administración">
+                <option value="Tesorería">Tesorería</option>
+                <option value="Contabilidad">Contabilidad</option>
+                <option value="Ingresos">Ingresos</option>
+                <option value="Egresos">Egresos</option>
+                <option value="Catastro">Catastro</option>
+                <option value="Recursos Humanos (RH)">Recursos Humanos (RH)</option>
+                <option value="Proveeduría">Proveeduría</option>
+                <option value="Transparencia">Transparencia</option>
+                <option value="Participación Ciudadana">Participación Ciudadana</option>
+                <option value="Recepción General">Recepción General</option>
+              </optgroup>
+
+              <optgroup label="Desarrollo Social y Salud">
+                <option value="Dirección de Desarrollo Social">Dirección de Desarrollo Social</option>
+                <option value="Inmujer">Inmujer</option>
+                <option value="Juventud">Juventud</option>
+                <option value="Salud">Salud</option>
+                <option value="Consultorio Médico">Consultorio Médico</option>
+                <option value="Consultorio Dentista">Consultorio Dentista</option>
+                <option value="CAI">CAI</option>
+                <option value="Casa del Abuelo">Casa del Abuelo</option>
+                <option value="SIPPINA">SIPPINA</option>
+                <option value="Procuraduría">Procuraduría</option>
+                <option value="Psicología">Psicología</option>
+              </optgroup>
+
+              <optgroup label="Sistema DIF Municipal">
+                <option value="Presidencia DIF">Presidencia DIF</option>
+                <option value="Dirección DIF">Dirección DIF</option>
+                <option value="Oficinas DIF">Oficinas DIF</option>
+                <option value="Recepción DIF">Recepción DIF</option>
+                <option value="Psicoterapia DIF">Psicoterapia DIF</option>
+                <option value="Consultorio Dentista DIF">Consultorio Dentista DIF</option>
+              </optgroup>
+
+              <optgroup label="Servicios, Cultura y Deporte">
+                <option value="Obras Públicas">Obras Públicas</option>
+                <option value="Desarrollo Urbano">Desarrollo Urbano</option>
+                <option value="Servicios Municipales">Servicios Municipales</option>
+                <option value="Servicios Ambientales">Servicios Ambientales</option>
+                <option value="Comercio">Comercio</option>
+                <option value="Turismo">Turismo</option>
+                <option value="Protección Civil (PC)">Protección Civil (PC)</option>
+                <option value="Registro Civil">Registro Civil</option>
+                <option value="Transporte Vehicular">Transporte Vehicular</option>
+                <option value="Panteón">Panteón</option>
+                <option value="Biblioteca">Biblioteca</option>
+                <option value="Biblioteca 21 de Marzo">Biblioteca 21 de Marzo</option>
+                <option value="Auditorio MT">Auditorio MT</option>
+                <option value="Deportivo Vicente Guerrero">Deportivo Vicente Guerrero</option>
+                <option value="Ameyal">Ameyal</option>
+              </optgroup>
+
+              <optgroup label="Tecnología y Comunicación">
+                <option value="Sistemas">Sistemas</option>
+                <option value="Comunicación Social">Comunicación Social</option>
+                <option value="Cabina de Radio">Cabina de Radio</option>
+                <option value="Ayuntamiento (General)">Ayuntamiento (General)</option>
+              </optgroup>
+
+              <optgroup label="Escalabilidad">
+                <option value="OTRA">Otra área / Especificar</option>
+              </optgroup>
+            </select>
+            <small class="error-msg" id="err-area">Selecciona el área solicitante.</small>
+          </div>
+
+          <!-- Flujo Alternativo A1: Campo libre obligatorio si elige 'Otra área' -->
+          <div class="form-group oculto" id="grupo-otra-area">
+            <label for="otra-area-texto">Especificar Nombre del Área <span class="req">*</span></label>
+            <input
+              type="text"
+              id="otra-area-texto"
+              placeholder="Ej. Coordinación de Eventos / Comisión Temporal"
+            />
+            <small class="error-msg" id="err-otra-area">Escribe el nombre del departamento o comisión.</small>
+          </div>
+
+          <!-- Fila 3: Equipo Afectado -->
+          <div class="form-group">
+            <label for="equipo-afectado">Equipo o Infraestructura Afectada <span class="req">*</span></label>
+            <input
+              type="text"
+              id="equipo-afectado"
+              list="sugerencias-equipos"
+              placeholder="Ej. Computadora de escritorio, Impresora, Red..."
+              required
+            />
+            <datalist id="sugerencias-equipos">
+              <option value="Computadora de escritorio"></option>
+              <option value="Laptop"></option>
+              <option value="Impresora"></option>
+              <option value="Cableado de red"></option>
+              <option value="Router / Switch"></option>
+              <option value="Conexión a Internet / Wi-Fi"></option>
+              <option value="Carpeta compartida en red"></option>
+              <option value="Escáner / Multifuncional"></option>
+              <option value="Teléfono IP / Conmutador"></option>
+            </datalist>
+            <small class="error-msg" id="err-equipo">Indica el equipo o servicio afectado.</small>
+          </div>
+
+          <!-- Fila 4 Flexible: Descripción de la Falla -->
+          <div class="form-group form-group-grow">
+            <label for="descripcion-falla">Descripción de la Falla y Diagnóstico <span class="req">*</span></label>
+            <textarea
+              id="descripcion-falla"
+              rows="3"
+              placeholder="Detalla el problema reportado por el usuario y la acción o diagnóstico técnico..."
+              required
+            ></textarea>
+            <small class="error-msg" id="err-descripcion">Describe la falla reportada.</small>
+          </div>
+
+          <!-- Fila 5: Botones -->
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" id="btn-limpiar">Limpiar</button>
+            <button type="submit" class="btn btn-primary">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+                <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                <polyline points="7 3 7 8 15 8"></polyline>
+              </svg>
+              Guardar Registro
+            </button>
+          </div>
+        </form>
+      </section>
+
+      <!-- CU-02 y CU-03: Tablero de Seguimiento y Exportación -->
+      <section class="card board-card" aria-labelledby="titulo-tablero">
+        <div class="card-header board-header">
+          <div>
+            <div class="title-with-count">
+              <h2 id="titulo-tablero">Historial y Control de Seguimiento</h2>
+              <span class="count-pill" id="contador-resultados">0 registros</span>
+            </div>
+            <p class="card-subtitle">Consulta, actualiza estados y exporta reportes administrativos con formato</p>
+          </div>
+          <button type="button" class="btn btn-excel" id="btn-exportar-excel">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="8" y1="13" x2="16" y2="17"></line>
+              <line x1="16" y1="13" x2="8" y2="17"></line>
+            </svg>
+            <span>Exportar a Excel (.xlsx)</span>
+          </button>
+        </div>
+
+        <!-- Filtros de Búsqueda -->
+        <div class="filters-bar">
+          <div class="search-box">
+            <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input
+              type="search"
+              id="filtro-busqueda"
+              placeholder="Buscar por folio, departamento, equipo o falla..."
+              aria-label="Buscar tareas"
+            />
+          </div>
+          <select id="filtro-estado" aria-label="Filtrar por estado">
+            <option value="TODOS">Todos los estados</option>
+            <option value="Pendiente">Pendiente</option>
+            <option value="En proceso">En proceso</option>
+            <option value="Terminado">Terminado</option>
+          </select>
+          <select id="filtro-tipo" aria-label="Filtrar por tipo de servicio">
+            <option value="TODOS">Hardware y Software</option>
+            <option value="Hardware">Solo Hardware</option>
+            <option value="Software">Solo Software</option>
+          </select>
+        </div>
+
+        <!-- Aviso de Bandeja Vacía -->
+        <div class="empty-state" id="estado-vacio">
+          <div class="empty-icon-wrap">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
+              <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"></path>
+              <rect x="9" y="3" width="6" height="4" rx="1"></rect>
+            </svg>
+          </div>
+          <h3>Bandeja de tareas vacía</h3>
+          <p>No hay solicitudes técnicas registradas todavía. Captura el primer reporte en el formulario de la izquierda.</p>
+        </div>
+
+        <!-- Tabla con Scroll Interno y los 7 Campos Obligatorios -->
+        <div class="table-wrapper oculto" id="contenedor-tabla">
+          <table class="tasks-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Área Solicitante</th>
+                <th>Equipo Afectado</th>
+                <th>Tipo</th>
+                <th>Descripción de la Falla</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-tareas-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Pie de Página Institucional Compacto -->
+  <footer class="gov-footer">
+    <div class="container gov-footer-content">
+      <span><strong>H. Ayuntamiento de Río Blanco, Veracruz</strong> &bull; Departamento de Sistemas</span>
+      <span>Portal Interno de Soporte Técnico</span>
+    </div>
+  </footer>
+
+  <!-- Modal CU-02: Actualizar Estado de Seguimiento -->
+  <div class="modal-backdrop oculto" id="modal-estado" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modal-titulo">Actualizar Estado de Tarea <span id="modal-id-tarea">#</span></h3>
+        <button type="button" class="btn-close" id="btn-cerrar-modal" aria-label="Cerrar">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-info">
+          <p><strong>Área:</strong> <span id="modal-area"></span></p>
+          <p><strong>Equipo:</strong> <span id="modal-equipo"></span></p>
+        </div>
+        <div class="form-group" style="margin-bottom: 0;">
+          <label for="select-nuevo-estado">Nuevo Estado de Seguimiento</label>
+          <select id="select-nuevo-estado">
+            <option value="Pendiente">Pendiente</option>
+            <option value="En proceso">En proceso</option>
+            <option value="Terminado">Terminado</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id="btn-cancelar-estado">Cancelar</button>
+        <button type="button" class="btn btn-primary" id="btn-confirmar-estado">Confirmar Cambio</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notificación Flotante (Toast) -->
+  <div class="toast-container" id="toast-container" aria-live="polite"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
