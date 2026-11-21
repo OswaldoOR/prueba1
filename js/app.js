@@ -23,6 +23,21 @@ function guardarTareas(listaTareas) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(listaTareas));
 }
 
+async function cargarTareasBaseDesdeGitHub() {
+  try {
+    const respuesta = await fetch('tareas.json', { cache: 'no-store' });
+    if (!respuesta.ok) return;
+
+    const datosRemotos = await respuesta.json();
+    if (Array.isArray(datosRemotos) && datosRemotos.length > 0) {
+      tareas = datosRemotos;
+      guardarTareas(tareas);
+    }
+  } catch (error) {
+    console.warn('No se pudo leer tareas.json (normal si abres el HTML directo sin servidor):', error);
+  }
+}
+
 // =========================================================================
 // 2. ESTADO DE LA APLICACIÓN Y REFERENCIAS AL DOM
 // =========================================================================
