@@ -1,5 +1,14 @@
 [
   {
+    "ID_Tarea": 2,
+    "Fecha_Solicitud": "23/11/2026",
+    "Area_Solicitante": "Regiduría 4",
+    "Equipo_Afectado": "Teléfono IP / Conmutador",
+    "Tipo_Servicio": "Software",
+    "Descripcion_Falla": "WWWWWWWWWWW",
+    "Estado_Seguimiento": "Pendiente"
+  },
+  {
     "ID_Tarea": 1,
     "Fecha_Solicitud": "21/11/2026",
     "Area_Solicitante": "Regiduría 2",
