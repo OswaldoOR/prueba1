@@ -1,5 +1,14 @@
 [
   {
+    "ID_Tarea": 3,
+    "Fecha_Solicitud": "24/11/2026",
+    "Area_Solicitante": "Transporte Vehicular",
+    "Equipo_Afectado": "Impresora",
+    "Tipo_Servicio": "Software",
+    "Descripcion_Falla": "uuuuu",
+    "Estado_Seguimiento": "Pendiente"
+  },
+  {
     "ID_Tarea": 2,
     "Fecha_Solicitud": "23/11/2026",
     "Area_Solicitante": "Regiduría 4",
