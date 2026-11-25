@@ -1,5 +1,15 @@
 [
   {
+    "ID_Tarea": 4,
+    "Fecha_Solicitud": "24/11/2026",
+    "Area_Solicitante": "Presidencia",
+    "Solicitante": "Lic. Adriana Isabel Ponce (Oficial — Registro Civil)",
+    "Equipo_Afectado": "Impresora",
+    "Tipo_Servicio": "Hardware",
+    "Descripcion_Falla": "oop",
+    "Estado_Seguimiento": "Pendiente"
+  },
+  {
     "ID_Tarea": 3,
     "Fecha_Solicitud": "24/11/2026",
     "Area_Solicitante": "Transporte Vehicular",
