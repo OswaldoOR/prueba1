@@ -20,14 +20,5 @@
     "Tipo_Servicio": "Hardware",
     "Descripcion_Falla": "oop",
     "Estado_Seguimiento": "Terminado"
-  },
-  {
-    "ID_Tarea": 1,
-    "Fecha_Solicitud": "21/11/2026",
-    "Area_Solicitante": "Regiduría 2",
-    "Equipo_Afectado": "Fjvh",
-    "Tipo_Servicio": "Software",
-    "Descripcion_Falla": "Djvk",
-    "Estado_Seguimiento": "Pendiente"
   }
 ]
