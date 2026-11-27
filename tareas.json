@@ -1,5 +1,17 @@
 [
   {
+    "ID_Tarea": 6,
+    "Fecha_Solicitud": "27/11/2026",
+    "Area_Solicitante": "COMUNICACIÓN",
+    "Solicitante": "AUX1",
+    "Puesto_Solicitante": "AUX COMUN. SOCIAL",
+    "Tipo_Plaza": "PRACTICANTE",
+    "Equipo_Afectado": "Teléfono IP / Conmutador",
+    "Tipo_Servicio": "Software",
+    "Descripcion_Falla": "prueba",
+    "Estado_Seguimiento": "Pendiente"
+  },
+  {
     "ID_Tarea": 5,
     "Fecha_Solicitud": "04/11/2026",
     "Area_Solicitante": "PRESIDENCIA",
