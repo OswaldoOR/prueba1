@@ -1,5 +1,17 @@
 [
   {
+    "ID_Tarea": 5,
+    "Fecha_Solicitud": "04/11/2026",
+    "Area_Solicitante": "PRESIDENCIA",
+    "Solicitante": "JOSE ANTONIO MAY",
+    "Puesto_Solicitante": "PRESIDENCIA",
+    "Tipo_Plaza": "CONFIANZA",
+    "Equipo_Afectado": "Computadora de escritorio",
+    "Tipo_Servicio": "Hardware",
+    "Descripcion_Falla": "ttt",
+    "Estado_Seguimiento": "Pendiente"
+  },
+  {
     "ID_Tarea": 4,
     "Fecha_Solicitud": "24/11/2026",
     "Area_Solicitante": "Presidencia",
