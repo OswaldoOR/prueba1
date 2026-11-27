@@ -34,17 +34,5 @@
     "Tipo_Servicio": "Hardware",
     "Descripcion_Falla": "ttt",
     "Estado_Seguimiento": "En proceso"
-  },
-  {
-    "ID_Tarea": 4,
-    "Fecha_Solicitud": "24/11/2026",
-    "Area_Solicitante": "PRESIDENCIA",
-    "Solicitante": "Lic. Adriana Isabel Ponce (Oficial — Registro Civil)",
-    "Equipo_Afectado": "Impresora",
-    "Tipo_Servicio": "Hardware",
-    "Descripcion_Falla": "oop",
-    "Estado_Seguimiento": "Terminado",
-    "Puesto_Solicitante": "NO ESPECIFICADO",
-    "Tipo_Plaza": "CONFIANZA"
   }
 ]
