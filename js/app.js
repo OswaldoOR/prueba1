@@ -1,11 +1,14 @@
 /**
  * Sistema de Control y Seguimiento de Tareas Técnicas
- * H. Ayuntamiento de Río Blanco - Departamento de Sistemas
+ * H. Ayuntamiento Constitucional de Río Blanco, Veracruz - Departamento de Sistemas
+ * Archivo Principal de Lógica (js/app.js)
  */
 
 const STORAGE_KEY = 'rioblanco_sistemas_tareas_v1';
+const CATALOGO_PERSONAL_KEY = 'rioblanco_catalogo_personal_v1';
 const SYNC_CONFIG_KEY = 'rioblanco_github_sync_cfg_v1';
 const ARCHIVO_REMOTO = 'tareas.json';
+const ARCHIVO_CATALOGO_REMOTO = 'personal.json';
 const INTERVALO_AUTO_SYNC_MS = 10000;
 
 // =========================================================================
@@ -18,67 +21,218 @@ const GITHUB_GLOBAL_CONFIG = {
 };
 
 // =========================================================================
-// CATÁLOGO FICTICIO DE JEFES / RESPONSABLES SUGERIDOS POR ÁREA
+// CATÁLOGO BASE DE PERSONAL POR ÁREA (EXTRAÍDO DE NOMBRES.xlsx)
 // =========================================================================
-const MAPA_JEFES_POR_AREA = {
-  'Presidencia': 'Lic. Ricardo Antonio Morales (Jefe — Presidencia)',
-  'Secretaría (Secretario)': 'Lic. Alejandro Vega Castellanos (Secretaría)',
-  'Sindicatura (Síndico)': 'Lic. María Fernanda Solís (Sindicatura)',
-  'Jurídico': 'Lic. Jorge Luis Hernández (Jefe — Jurídico)',
-  'Gobernación': 'Lic. Héctor Manuel Ramírez (Jefe — Gobernación)',
-  'Área Cabildo': 'C. Patricia Elena Navarro (Encargada — Cabildo)',
-  'Regidurías Recepción': 'Reg. Gabriela Ortiz Domínguez (Regidurías)',
-  'Regiduría 1': 'Reg. Gabriela Ortiz Domínguez (Regidurías)',
-  'Regiduría 2': 'Reg. Gabriela Ortiz Domínguez (Regidurías)',
-  'Regiduría 3': 'Reg. Gabriela Ortiz Domínguez (Regidurías)',
-  'Regiduría 4': 'Reg. Gabriela Ortiz Domínguez (Regidurías)',
-  'Regiduría 5': 'Reg. Gabriela Ortiz Domínguez (Regidurías)',
-  'Regiduría 6': 'Reg. Gabriela Ortiz Domínguez (Regidurías)',
-  'Tesorería': 'C.P. Roberto Carlos Méndez (Tesorero)',
-  'Contabilidad': 'C.P. Ana Laura Domínguez (Jefa — Contabilidad)',
-  'Ingresos': 'Lic. Fernando Javier Cruz (Jefe — Ingresos)',
-  'Egresos': 'C.P. Verónica Guzmán Ríos (Jefa — Egresos)',
-  'Catastro': 'Ing. Mauricio Paredes Luna (Jefe — Catastro)',
-  'Recursos Humanos (RH)': 'Lic. Claudia Patricia Reyes (Jefa — RH)',
-  'Proveeduría': 'Lic. Eduardo Sánchez Ortega (Jefe — Proveeduría)',
-  'Transparencia': 'Lic. Sofía Alejandra Torres (Jefa — Transparencia)',
-  'Participación Ciudadana': 'C. Miguel Ángel Flores (Jefe — Part. Ciudadana)',
-  'Recepción General': 'C. Daniela Ivette Herrera (Recepción General)',
-  'Dirección de Desarrollo Social': 'Lic. Mónica Beatriz Castro (Dir. Desarrollo Social)',
-  'Inmujer': 'Lic. Valeria Jiménez Aguilar (Titular — Inmujer)',
-  'Juventud': 'C. Diego Armando Salazar (Encargado — Juventud)',
-  'Salud': 'Dr. José Luis Peralta (Dir. Salud / Médico)',
-  'Consultorio Médico': 'Dr. José Luis Peralta (Dir. Salud / Médico)',
-  'Consultorio Dentista': 'Dra. Karla Paola Nava (Consultorio Dentista)',
-  'CAI': 'Profra. Rosa María Bautista (Coordinadora — CAI)',
-  'Casa del Abuelo': 'C. Guadalupe Contreras (Encargada — Casa del Abuelo)',
-  'SIPPINA': 'Lic. Andrea Estefanía Ruiz (Titular — SIPPINA)',
-  'Procuraduría': 'Lic. Iván Arturo Delgado (Procurador)',
-  'Psicología': 'Psic. Mariana Lozano Pérez (Psicología)',
-  'Presidencia DIF': 'C. Lucía Margarita Peña (Dirección DIF)',
-  'Dirección DIF': 'C. Lucía Margarita Peña (Dirección DIF)',
-  'Oficinas DIF': 'C. Norma Alicia Vázquez (Coordinación DIF)',
-  'Recepción DIF': 'C. Norma Alicia Vázquez (Coordinación DIF)',
-  'Psicoterapia DIF': 'Psic. Brenda Liliana Cortés (Psicoterapia DIF)',
-  'Consultorio Dentista DIF': 'Dra. Cintia Nayeli Romero (Dentista DIF)',
-  'Obras Públicas': 'Ing. César Augusto Alvarado (Dir. Obras Públicas)',
-  'Desarrollo Urbano': 'Arq. Diana Carolina Ochoa (Jefa — Des. Urbano)',
-  'Servicios Municipales': 'C. Sergio Arturo Maldonado (Jefe — Serv. Municipales)',
-  'Servicios Ambientales': 'Biol. Ernesto Alonso Vargas (Jefe — Serv. Ambientales)',
-  'Comercio': 'C. Raúl Esteban Figueroa (Jefe — Comercio)',
-  'Turismo': 'Lic. Paulina Montserrat Silva (Jefa — Turismo)',
-  'Protección Civil (PC)': 'Cmdte. Javier Omar Espinoza (Dir. Protección Civil)',
-  'Registro Civil': 'Lic. Adriana Isabel Ponce (Oficial — Registro Civil)',
-  'Transporte Vehicular': 'C. Marco Antonio Cabrera (Jefe — Transporte)',
-  'Panteón': 'C. Martín Gerardo Zamora (Encargado — Panteón)',
-  'Biblioteca': 'Profra. Silvia Elena Lara (Encargada — Bibliotecas)',
-  'Biblioteca 21 de Marzo': 'Profra. Silvia Elena Lara (Encargada — Bibliotecas)',
-  'Auditorio MT': 'C. Óscar Daniel Sandoval (Encargado — Auditorio MT)',
-  'Deportivo Vicente Guerrero': 'Prof. Luis Enrique Chávez (Encargado — Deportivo)',
-  'Ameyal': 'C. Karla Beatriz Mendoza (Encargada — Ameyal)',
-  'Sistemas': 'Ing. José Manuel Trujillo (Jefe — Sistemas)',
-  'Comunicación Social': 'Lic. Rodrigo Sebastián León (Jefe — Com. Social)',
-  'Cabina de Radio': 'Loc. Gerardo Iván Montes (Cabina de Radio)'
+const CATALOGO_PERSONAL_BASE = {
+  'PRESIDENCIA': [
+    { nombre: 'JOSE ANTONIO MAY', puesto: 'PRESIDENCIA', tipo: 'CONFIANZA' },
+    { nombre: 'AMANDO', puesto: 'SECRETARIO DE PRESIDENCIA', tipo: 'CONFIANZA' },
+    { nombre: 'LIZ', puesto: 'ASISTENTE PRESIDENCIA', tipo: 'CONFIANZA' },
+    { nombre: 'KATY', puesto: 'MONITORISTA 1', tipo: 'CONFIANZA' },
+    { nombre: 'SIN NOMBRE', puesto: 'MONITORISTA 2', tipo: 'CONFIANZA' },
+    { nombre: 'LUCERO', puesto: 'RECEPCION', tipo: 'CONFIANZA' }
+  ],
+  'SECRETARIO': [
+    { nombre: 'URIEL', puesto: 'SECRETARIO', tipo: 'CONFIANZA' },
+    { nombre: 'RODOLFO', puesto: 'SECRE DEL SECRE DEL AYUN', tipo: 'SINDICATO' },
+    { nombre: 'AUX1', puesto: 'AUX SECRETARIO', tipo: 'PRACTICANTE' }
+  ],
+  'REGIDURIAS': [
+    { nombre: 'REG 1 ARLETH JIMNEZ', puesto: 'REGIDORA 1', tipo: 'CONFIANZA' },
+    { nombre: 'REG 2 JORGE HDZ', puesto: 'REGIDOR 2', tipo: 'CONFIANZA' },
+    { nombre: 'REG 3 ALEYDA RODRIGUEZ', puesto: 'REGIDORA 3', tipo: 'CONFIANZA' },
+    { nombre: 'REG 4 AIKO MARTINEZ', puesto: 'REGIDORA 4', tipo: 'CONFIANZA' },
+    { nombre: 'REG 5 CESAR ALCARAZ', puesto: 'REGIDOR 5', tipo: 'CONFIANZA' },
+    { nombre: 'REG 6 FRED OLIVARES', puesto: 'REGIDOR 6', tipo: 'CONFIANZA' },
+    { nombre: 'CRISTINA', puesto: 'AUX REG / SECRETARIA', tipo: 'SINDICATO' },
+    { nombre: 'PATY', puesto: 'AUX REG / SECRETARIA', tipo: 'SINDICATO' },
+    { nombre: 'CLAUDIA CAMPOS', puesto: 'AUX REG / SECRETARIA', tipo: 'SINDICATO' },
+    { nombre: 'GUADALUPE ALVARADO', puesto: 'AUX REG / SECRETARIA', tipo: 'SINDICATO' },
+    { nombre: 'PILAR', puesto: 'AUX REG / SECRETARIA', tipo: 'SINDICATO' },
+    { nombre: 'ELIZETH', puesto: 'AUX REG / SECRETARIA', tipo: 'SINDICATO' }
+  ],
+  'TESORERIA': [
+    { nombre: 'MARCO SANCHEZ', puesto: 'TESORERO', tipo: 'CONFIANZA' },
+    { nombre: 'JENY', puesto: 'AUX TESORERIA', tipo: 'CONFIANZA' },
+    { nombre: 'ISA', puesto: 'SECRE TESO', tipo: 'SINDICATO' }
+  ],
+  'CONTADURIA': [
+    { nombre: 'ANGEL DE JESUS', puesto: 'CONTRALOR', tipo: 'CONFIANZA' },
+    { nombre: 'DANIELA', puesto: 'AUX', tipo: 'CONFIANZA' },
+    { nombre: 'AUX1', puesto: 'AUX CONTADURIA', tipo: 'PRACTICANTE' }
+  ],
+  'COMUNICACIÓN': [
+    { nombre: 'CRISTIAN LOPEZ', puesto: 'DIRECTOR COMUNI. DIG.', tipo: 'CONFIANZA' },
+    { nombre: 'GUILLERMO CARREON', puesto: 'COMUN. SOCIAL', tipo: 'CONFIANZA' },
+    { nombre: 'GERSON', puesto: 'AUX COMUN. SOCIAL', tipo: 'CONFIANZA' },
+    { nombre: 'AUX1', puesto: 'AUX COMUN. SOCIAL', tipo: 'PRACTICANTE' },
+    { nombre: 'AUX2', puesto: 'AUX COMUN. SOCIAL', tipo: 'PRACTICANTE' }
+  ],
+  'JURIDICO': [
+    { nombre: 'ELOY BAROJAS', puesto: 'TITULAR JURIDICO', tipo: 'CONFIANZA' },
+    { nombre: 'USUARIO', puesto: 'AUX JURIDICO', tipo: 'CONFIANZA' },
+    { nombre: 'AUX1', puesto: 'AUX JURIDICO', tipo: 'PRACTICANTE' }
+  ],
+  'INMUJER': [
+    { nombre: 'TERESITA DE JESUS', puesto: 'DIRECTORA', tipo: 'CONFIANZA' },
+    { nombre: 'ADAMARY', puesto: 'AUX INMUJER', tipo: 'CONFIANZA' },
+    { nombre: 'AUX2', puesto: 'AUX INMUJER', tipo: 'CONFIANZA' },
+    { nombre: 'LIZ', puesto: 'PSICOLOGA', tipo: 'CONFIANZA' },
+    { nombre: 'JOSE ANGEL', puesto: 'ABOGADO INMUJER', tipo: 'CONFIANZA' },
+    { nombre: 'JUAN MANUEL REYES', puesto: 'TITULAR SIPINNA', tipo: 'CONFIANZA' }
+  ],
+  'TRANSPARENCIA': [
+    { nombre: 'JAVIER SHETINNO', puesto: 'TITULAR TRANSPARENCIA', tipo: 'CONFIANZA' }
+  ],
+  'SISTEMAS': [
+    { nombre: 'RODOLFO ZAMORA', puesto: 'TITULAR SISTEMAS', tipo: 'CONFIANZA' },
+    { nombre: 'AUX1', puesto: 'AUX', tipo: 'PRACTICANTE' }
+  ],
+  'OBRAS PUBLICAS': [
+    { nombre: 'CARLOS GARCIA', puesto: 'DIREC. OBRAS PUB.', tipo: 'CONFIANZA' },
+    { nombre: 'RIGOBERTO ALELUYA', puesto: 'AUX OBRAS PUBLICAS', tipo: 'CONFIANZA' },
+    { nombre: 'USUARIO 1', puesto: 'INSPECTOR DE OBRA', tipo: 'CONFIANZA' },
+    { nombre: 'USUARIO 2', puesto: 'INSPECTOR DE OBRA', tipo: 'CONFIANZA' },
+    { nombre: 'ROBERTO CID', puesto: 'RAMOS 033', tipo: 'CONFIANZA' },
+    { nombre: 'WALDO TORNELL', puesto: 'TITULAR DESARROLLO URBANO', tipo: 'CONFIANZA' },
+    { nombre: 'KARLA', puesto: 'AUX DESA. URB.', tipo: 'CONFIANZA' },
+    { nombre: 'AUX 1', puesto: 'AUX DESA. URB.', tipo: 'PRACTICANTE' },
+    { nombre: 'VICTOR BERNAL', puesto: 'ASISTENTE DES. URB.', tipo: 'SINDICATO' },
+    { nombre: 'GIOVANNI', puesto: 'AUX OBRAS PUBLICAS', tipo: 'SINDICATO' },
+    { nombre: 'VERONICA', puesto: 'AUX OBRAS PUBLICAS', tipo: 'SINDICATO' },
+    { nombre: 'AUX 2', puesto: 'AUX OBRAS PUBLICAS', tipo: 'PRACTICANTE' },
+    { nombre: 'ESVEIDY', puesto: 'RECEPCION OBRAS PUB.', tipo: 'SINDICATO' },
+    { nombre: 'DELFINO', puesto: 'RECEPCION OBRAS PUB.', tipo: 'SINDICATO' }
+  ],
+  'DESARROLLO ECONOMICO Y COMERCIO': [
+    { nombre: 'JESUS BLASS', puesto: 'DIREC. COMERCIO', tipo: 'CONFIANZA' },
+    { nombre: 'SIN NOMBRE', puesto: 'AUX COMERCIO', tipo: 'CONFIANZA' },
+    { nombre: 'ULISES', puesto: 'ASISTENTE DE COMERCIO', tipo: 'SINDICATO' },
+    { nombre: 'SIN NOMBRE', puesto: 'ENCARGADA MERCADO', tipo: 'CONFIANZA' }
+  ],
+  'CONTABILIDAD': [
+    { nombre: 'SERBANDO', puesto: 'TITULAR CONTABILIDAD', tipo: 'CONFIANZA' },
+    { nombre: 'SIN NOMBRE', puesto: 'AUX CONTABILIDAD', tipo: 'CONFIANZA' },
+    { nombre: 'DANIELA', puesto: 'AUX CONTABILIDAD', tipo: 'CONFIANZA' },
+    { nombre: 'AUX1', puesto: 'AUX CONTABILIDAD', tipo: 'PRACTICANTE' }
+  ],
+  'RRHH': [
+    { nombre: 'ERIKA', puesto: 'TITULAR RRHH', tipo: 'CONFIANZA' },
+    { nombre: 'ANELY', puesto: 'AUX RRHH', tipo: 'CONFIANZA' },
+    { nombre: 'AUX1', puesto: 'AUX RRHH', tipo: 'PRACTICANTE' }
+  ],
+  'PROVEEDURIA': [
+    { nombre: 'KARINA', puesto: 'TITULAR PROVEEDURIA', tipo: 'CONFIANZA' },
+    { nombre: 'ANGELICA', puesto: 'AUX PROVEEDURIA', tipo: 'CONFIANZA' },
+    { nombre: 'PABLO', puesto: 'AUX PROVEEDURIA', tipo: 'CONFIANZA' },
+    { nombre: 'LUIS', puesto: 'AUX PROVEEDURIA', tipo: 'CONFIANZA' }
+  ],
+  'SINDICATURA': [
+    { nombre: 'AIDE CRUZ', puesto: 'SINDICO', tipo: 'CONFIANZA' },
+    { nombre: 'DIANA AUX2', puesto: 'SINDICO', tipo: 'CONFIANZA' },
+    { nombre: 'INGRID AUX1', puesto: 'SINDICO', tipo: 'CONFIANZA' }
+  ],
+  'CATASTRO': [
+    { nombre: 'ANGEL RGUEZ', puesto: 'TITULAR CATASTRO', tipo: 'CONFIANZA' },
+    { nombre: 'USUARIO 1G', puesto: 'AUX CATASTRO', tipo: 'CONFIANZA' },
+    { nombre: 'USUARIO 2A', puesto: 'AUX CATASTRO', tipo: 'CONFIANZA' },
+    { nombre: 'USUARIO 3P', puesto: 'AUX CATASTRO', tipo: 'CONFIANZA' },
+    { nombre: 'NADIA', puesto: 'ASISTENTE SINDICATO', tipo: 'SINDICATO' }
+  ],
+  'INGRESOS': [
+    { nombre: 'GOYITA BRENIS', puesto: 'TITULAR INGRESOS', tipo: 'CONFIANZA' },
+    { nombre: 'SIN NOMBRE (AUX1)', puesto: 'ASISTENTE INGRESOS', tipo: 'PRACTICANTE' },
+    { nombre: 'SIN NOMBRE', puesto: 'CAJA 1', tipo: 'CONFIANZA' },
+    { nombre: 'ALEYRA', puesto: 'CAJA 2', tipo: 'SINDICATO' },
+    { nombre: 'USUARIO 3', puesto: 'CAJA 3', tipo: 'SINDICATO' },
+    { nombre: 'USUARIO 4', puesto: 'CAJA 4', tipo: 'SINDICATO' },
+    { nombre: 'USUARIO 5', puesto: 'CAJA 5', tipo: 'SINDICATO' },
+    { nombre: 'AUX2', puesto: 'AUX INGRESOS', tipo: 'PRACTICANTE' },
+    { nombre: 'AUX3', puesto: 'AUX INGRESOS', tipo: 'PRACTICANTE' }
+  ],
+  'EGRESOS': [
+    { nombre: 'JUDITH SOLANO', puesto: 'TITULAR EGRESOS', tipo: 'CONFIANZA' }
+  ],
+  'TRANSPORTE': [
+    { nombre: 'SARA', puesto: 'TITULAR TRANSPORTE', tipo: 'CONFIANZA' },
+    { nombre: 'JORGE MARIN', puesto: 'ENCARGADO PARQ.', tipo: 'CONFIANZA' }
+  ],
+  'DESARROLLO SOCIAL Y HUMANO': [
+    { nombre: 'ELIZABETH CANTERO', puesto: 'DIRECTORA DESARROLLO SOC.', tipo: 'CONFIANZA' },
+    { nombre: 'PAULO', puesto: 'COORD. DEPORTE', tipo: 'CONFIANZA' },
+    { nombre: 'OSCAR', puesto: 'COORD. SALUD', tipo: 'CONFIANZA' },
+    { nombre: 'ANGEL OSORIO', puesto: 'COORD. SALUD ANIMAL', tipo: 'CONFIANZA' },
+    { nombre: 'VICTOR GTZ', puesto: 'COORD. TURISMO', tipo: 'CONFIANZA' },
+    { nombre: 'BELEN MERINO', puesto: 'COORD. JUVENTUD', tipo: 'CONFIANZA' },
+    { nombre: 'GABRIEL BELLO', puesto: 'COORD. EDUCACION', tipo: 'CONFIANZA' },
+    { nombre: 'CLEMENTINA', puesto: 'ENCARGADA BIBLIOTECA 1', tipo: 'CONFIANZA' },
+    { nombre: 'IRMA', puesto: 'AUX BIBLIOTECA', tipo: 'SINDICATO' },
+    { nombre: 'RODRIGO', puesto: 'AUX DEPORTE', tipo: 'CONFIANZA' }
+  ],
+  'SERVICIOS MUNICIPALES': [
+    { nombre: 'ORESTES RUIZ', puesto: 'DIREC. SERV. HUMANOS', tipo: 'CONFIANZA' },
+    { nombre: 'SIN NOMBRE', puesto: 'AUX SERV. MUNICIPALES', tipo: 'CONFIANZA' }
+  ],
+  'SERVICIOS AMBIENTALES': [
+    { nombre: 'QUERORIMI', puesto: 'DIREC. SERV. AMBIENTALES', tipo: 'CONFIANZA' },
+    { nombre: 'MARY', puesto: 'AUX SERV. AMBIENTALES', tipo: 'CONFIANZA' }
+  ],
+  'PROTECCION CIVIL': [
+    { nombre: 'RAFAEL GARCIA', puesto: 'DIREC. PC', tipo: 'CONFIANZA' },
+    { nombre: 'USUARIO 1', puesto: 'AUX PC', tipo: 'CONFIANZA' },
+    { nombre: 'USUARIO 2', puesto: 'AUX PC', tipo: 'CONFIANZA' }
+  ],
+  'PANTEON': [
+    { nombre: 'PREFECTO', puesto: 'ENCARGADO PANTEON', tipo: 'CONFIANZA' },
+    { nombre: 'SIN NOMBRE', puesto: 'ASISTENTE PANTEON', tipo: 'SINDICATO' },
+    { nombre: 'ALVARO', puesto: 'CAJA PANTEON', tipo: 'SINDICATO' }
+  ],
+  'GOBERNACION': [
+    { nombre: 'CRISTIAN MADRID', puesto: 'DIREC. GOBERNACION', tipo: 'CONFIANZA' },
+    { nombre: 'JESUS MARIN', puesto: 'AUX GOBERNACION', tipo: 'CONFIANZA' },
+    { nombre: 'JASSEL', puesto: 'AUX GOBERNACION', tipo: 'CONFIANZA' }
+  ],
+  'PARTICIPACION CIUDADANA': [
+    { nombre: 'LUZ MARIA', puesto: 'DIREC PARTICIPACION', tipo: 'CONFIANZA' },
+    { nombre: 'SIN NOMBRE', puesto: 'AUX PARTICIPACION', tipo: 'CONFIANZA' },
+    { nombre: 'SHIRLEY', puesto: 'AUX PARTICIPACION', tipo: 'CONFIANZA' }
+  ],
+  'REGISTRO CIVIL': [
+    { nombre: 'HEBER TECA', puesto: 'OFICIAL RC', tipo: 'CONFIANZA' },
+    { nombre: 'LUCERO', puesto: 'AUX RC', tipo: 'CONFIANZA' },
+    { nombre: 'VERONICA', puesto: 'ASISTENTE RC', tipo: 'SINDICATO' },
+    { nombre: 'BLANCA', puesto: 'ASISTENTE RC', tipo: 'SINDICATO' },
+    { nombre: 'SUPLENTE', puesto: 'ASISTENTE RC', tipo: 'SINDICATO' },
+    { nombre: 'JOSE LUIS', puesto: 'ASISTENTE RC', tipo: 'SINDICATO' },
+    { nombre: 'FABIOLA', puesto: 'CAJA RC', tipo: 'SINDICATO' }
+  ],
+  'PRESIDENCIA DIF': [
+    { nombre: 'GABY RGUEZ', puesto: 'PRESIDENTA DIF', tipo: 'CONFIANZA' },
+    { nombre: 'MILI', puesto: 'DIREC. DIF', tipo: 'CONFIANZA' },
+    { nombre: 'CARMEN', puesto: 'AUX1 PRESIDENCIA DIF', tipo: 'CONFIANZA' },
+    { nombre: 'MONSE VERA', puesto: 'AUX2 PRESIDENCIA DIF', tipo: 'CONFIANZA' },
+    { nombre: 'SIN NOMBRE', puesto: 'AUX3 PRESIDENCIA DIF', tipo: 'CONFIANZA' },
+    { nombre: 'ROSI', puesto: 'AUX4 PRESIDENCIA DIF', tipo: 'CONFIANZA' },
+    { nombre: 'CONCHITA', puesto: 'AUX5 PRESIDENCIA DIF', tipo: 'CONFIANZA' },
+    { nombre: 'LULA', puesto: 'AUX6 PRESIDENCIA DIF', tipo: 'CONFIANZA' },
+    { nombre: 'IVONNE', puesto: 'ENCARGADA CAIC', tipo: 'CONFIANZA' },
+    { nombre: 'USUARIO 1', puesto: 'AUX CAIC', tipo: 'CONFIANZA' },
+    { nombre: 'SANDRA', puesto: 'ENCARGADA CASA ABUELO', tipo: 'CONFIANZA' }
+  ],
+  'CONSULTORIOS DIF': [
+    { nombre: 'JOSEPH MAY', puesto: 'DR. DIF', tipo: 'CONFIANZA' },
+    { nombre: 'FANNY', puesto: 'ASISTENTE DR. DIF', tipo: 'CONFIANZA' },
+    { nombre: 'MELANY', puesto: 'DENTISTA DIF', tipo: 'CONFIANZA' },
+    { nombre: 'SIN NOMBRE', puesto: 'PSICOLOGA DIF', tipo: 'CONFIANZA' },
+    { nombre: 'AUX1', puesto: 'AUX PSICOLOGA DIF', tipo: 'CONFIANZA' },
+    { nombre: 'LENNY', puesto: 'PROCURADORA DIF', tipo: 'CONFIANZA' },
+    { nombre: 'USUARIO 1', puesto: 'ASISTENTE PROCURADORA DIF', tipo: 'CONFIANZA' },
+    { nombre: 'KARO', puesto: 'CAJERA DIF', tipo: 'CONFIANZA' },
+    { nombre: 'SIN NOMBRE', puesto: 'FISIOTERAPEUTA DIF', tipo: 'CONFIANZA' }
+  ],
+  'SINDICATO': [
+    { nombre: 'KATIA', puesto: 'SECRETARIA GRAL.', tipo: 'SINDICATO' }
+  ]
 };
 
 // =========================================================================
@@ -86,10 +240,44 @@ const MAPA_JEFES_POR_AREA = {
 // =========================================================================
 
 let ultimoShaRemoto = null;
+let ultimoShaCatalogoRemoto = null;
 let sincronizandoAhora = false;
 let subiendoAhora = false;
 let versionLocal = 0;
 let colaGuardadoRemoto = Promise.resolve();
+
+let catalogoPersonal = {};
+
+function clonarObjeto(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+
+function cargarCatalogoLocal() {
+  try {
+    const raw = localStorage.getItem(CATALOGO_PERSONAL_KEY);
+    if (!raw) return clonarObjeto(CATALOGO_PERSONAL_BASE);
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return parsed;
+    }
+    return clonarObjeto(CATALOGO_PERSONAL_BASE);
+  } catch (e) {
+    console.warn('Error al leer catálogo local, usando base:', e);
+    return clonarObjeto(CATALOGO_PERSONAL_BASE);
+  }
+}
+
+function guardarCatalogoLocal(catalogo) {
+  localStorage.setItem(CATALOGO_PERSONAL_KEY, JSON.stringify(catalogo));
+}
+
+function guardarCatalogo(catalogo) {
+  guardarCatalogoLocal(catalogo);
+  const copiaCatalogo = clonarObjeto(catalogo);
+  colaGuardadoRemoto = colaGuardadoRemoto.then(() =>
+    subirArchivoAGitHub(ARCHIVO_CATALOGO_REMOTO, copiaCatalogo, true)
+  );
+}
 
 function codificarTokenSeguro(tokenPlano) {
   const limpio = (tokenPlano || '').trim();
@@ -218,21 +406,25 @@ function base64ToUtf8(base64) {
   return new TextDecoder().decode(bytes);
 }
 
-async function subirTareasAGitHub(listaTareas, reintento = 0) {
+async function subirArchivoAGitHub(nombreArchivo, contenidoDatos, esCatalogo = false, reintento = 0) {
   const cfg = obtenerConfigSync();
   if (!cfg.owner || !cfg.repo || !cfg.token) {
-    actualizarIndicadorSync('local', 'Solo lectura (Clic p/ activar Sync)');
-    mostrarNotificacion(
-      'Este navegador aún no tiene permiso de escritura. Haz clic arriba en "Solo lectura" para vincularlo.',
-      'error'
-    );
+    if (!esCatalogo) {
+      actualizarIndicadorSync('local', 'Solo lectura (Clic p/ activar Sync)');
+      mostrarNotificacion(
+        'Este navegador aún no tiene permiso de escritura. Haz clic arriba en "Solo lectura" para vincularlo.',
+        'error'
+      );
+    }
     return false;
   }
 
   subiendoAhora = true;
-  actualizarIndicadorSync('syncing', 'Guardando en GitHub...');
+  if (!esCatalogo) {
+    actualizarIndicadorSync('syncing', 'Guardando en GitHub...');
+  }
 
-  const endpoint = `https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/${ARCHIVO_REMOTO}`;
+  const endpoint = `https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/${nombreArchivo}`;
   const headers = {
     Authorization: `Bearer ${cfg.token}`,
     Accept: 'application/vnd.github+json',
@@ -253,9 +445,11 @@ async function subirTareasAGitHub(listaTareas, reintento = 0) {
       throw new Error(`HTTP ${resGet.status}`);
     }
 
-    const contenidoJSON = JSON.stringify(listaTareas, null, 2);
+    const contenidoJSON = JSON.stringify(contenidoDatos, null, 2);
     const body = {
-      message: `Sync tareas (${listaTareas.length})`,
+      message: esCatalogo
+        ? 'Sync directorio de personal'
+        : `Sync tareas (${Array.isArray(contenidoDatos) ? contenidoDatos.length : 0})`,
       content: utf8ToBase64(contenidoJSON)
     };
     if (shaActual) body.sha = shaActual;
@@ -267,7 +461,7 @@ async function subirTareasAGitHub(listaTareas, reintento = 0) {
     });
 
     if (resPut.status === 409 && reintento < 2) {
-      return subirTareasAGitHub(listaTareas, reintento + 1);
+      return subirArchivoAGitHub(nombreArchivo, contenidoDatos, esCatalogo, reintento + 1);
     }
 
     if (!resPut.ok) {
@@ -277,18 +471,53 @@ async function subirTareasAGitHub(listaTareas, reintento = 0) {
 
     const respuestaPut = await resPut.json();
     if (respuestaPut.content && respuestaPut.content.sha) {
-      ultimoShaRemoto = respuestaPut.content.sha;
+      if (esCatalogo) {
+        ultimoShaCatalogoRemoto = respuestaPut.content.sha;
+      } else {
+        ultimoShaRemoto = respuestaPut.content.sha;
+      }
     }
 
     actualizarIndicadorSync('online', 'Sincronizado con GitHub');
     return true;
   } catch (error) {
-    console.error('Error al guardar en GitHub:', error);
-    actualizarIndicadorSync('error', 'Error Sync (Clic p/ revisar)');
-    mostrarNotificacion(`Error al subir a GitHub: ${error.message}`, 'error');
+    console.error(`Error al guardar ${nombreArchivo} en GitHub:`, error);
+    if (!esCatalogo) {
+      actualizarIndicadorSync('error', 'Error Sync (Clic p/ revisar)');
+      mostrarNotificacion(`Error al subir a GitHub: ${error.message}`, 'error');
+    }
     return false;
   } finally {
     subiendoAhora = false;
+  }
+}
+
+async function subirTareasAGitHub(listaTareas) {
+  return subirArchivoAGitHub(ARCHIVO_REMOTO, listaTareas, false);
+}
+
+async function sincronizarCatalogoDesdeGitHub(cfg, headers) {
+  try {
+    const endpointCat = `https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}/contents/${ARCHIVO_CATALOGO_REMOTO}?t=${Date.now()}`;
+    const resCat = await fetch(endpointCat, { headers, cache: 'no-store' });
+    if (resCat.ok) {
+      const dataCat = await resCat.json();
+      if (dataCat.sha && dataCat.sha !== ultimoShaCatalogoRemoto) {
+        const textoCat = base64ToUtf8(dataCat.content || '');
+        const catRemoto = JSON.parse(textoCat);
+        if (catRemoto && typeof catRemoto === 'object' && !Array.isArray(catRemoto)) {
+          ultimoShaCatalogoRemoto = dataCat.sha;
+          catalogoPersonal = catRemoto;
+          guardarCatalogoLocal(catalogoPersonal);
+          sincronizarAreasEnSelects();
+          if (selectArea.value) {
+            desplegarPersonalPorArea(selectArea.value);
+          }
+        }
+      }
+    }
+  } catch (e) {
+    // Si aún no existe personal.json en el repo, se mantiene el catálogo local
   }
 }
 
@@ -332,6 +561,8 @@ async function sincronizarDesdeGitHub(silencioso = true) {
         }
       }
 
+      await sincronizarCatalogoDesdeGitHub(cfg, headers);
+
       actualizarIndicadorSync(
         cfg.token ? 'online' : 'local',
         cfg.token ? 'Sincronizado con GitHub' : 'Solo lectura (Clic p/ activar Sync)'
@@ -357,7 +588,7 @@ async function sincronizarDesdeGitHub(silencioso = true) {
 function guardarTareas(listaTareas) {
   versionLocal += 1;
   guardarTareasLocal(listaTareas);
-  const copiaInstantanea = JSON.parse(JSON.stringify(listaTareas));
+  const copiaInstantanea = clonarObjeto(listaTareas);
   colaGuardadoRemoto = colaGuardadoRemoto.then(() => subirTareasAGitHub(copiaInstantanea));
 }
 
@@ -378,8 +609,19 @@ const grupoOtraArea = document.getElementById('grupo-otra-area');
 const inputOtraArea = document.getElementById('otra-area-texto');
 
 const selectPersona = document.getElementById('persona-solicitante');
+const btnEditarCatalogoInline = document.getElementById('btn-editar-catalogo-inline');
+
+const fichaPersonaCard = document.getElementById('ficha-persona-seleccionada');
+const btnModificarPersonaActual = document.getElementById('btn-modificar-persona-actual');
+const detalleNombre = document.getElementById('detalle-nombre');
+const detallePuesto = document.getElementById('detalle-puesto');
+const detalleTipo = document.getElementById('detalle-tipo');
+
 const grupoOtraPersona = document.getElementById('grupo-otra-persona');
 const inputOtraPersona = document.getElementById('otra-persona-texto');
+const inputOtraPersonaPuesto = document.getElementById('otra-persona-puesto');
+const selectOtraPersonaTipo = document.getElementById('otra-persona-tipo');
+const checkGuardarEnCatalogo = document.getElementById('guardar-en-catalogo');
 
 const inputEquipo = document.getElementById('equipo-afectado');
 const textareaDescripcion = document.getElementById('descripcion-falla');
@@ -394,9 +636,11 @@ const filtroBusqueda = document.getElementById('filtro-busqueda');
 const filtroEstado = document.getElementById('filtro-estado');
 const filtroTipo = document.getElementById('filtro-tipo');
 
+// Modal 1: Estado Rápido
 const modalEstado = document.getElementById('modal-estado');
 const selectNuevoEstado = document.getElementById('select-nuevo-estado');
 
+// Modal 2: Edición Completa
 const modalEditar = document.getElementById('modal-editar');
 const formEditarTarea = document.getElementById('form-editar-tarea');
 const editFecha = document.getElementById('edit-fecha');
@@ -406,12 +650,27 @@ const editOtraAreaTexto = document.getElementById('edit-otra-area-texto');
 const editPersona = document.getElementById('edit-persona');
 const editGrupoOtraPersona = document.getElementById('edit-grupo-otra-persona');
 const editOtraPersonaTexto = document.getElementById('edit-otra-persona-texto');
+const editPuesto = document.getElementById('edit-puesto');
+const editTipoPlaza = document.getElementById('edit-tipo-plaza');
 const editEquipo = document.getElementById('edit-equipo');
 const editEstado = document.getElementById('edit-estado');
 const editDescripcion = document.getElementById('edit-descripcion');
 
+// Modal 3: Eliminar
 const modalEliminar = document.getElementById('modal-eliminar');
 
+// Modal 4: Catálogo / Directorio de Personal
+const modalCatalogo = document.getElementById('modal-catalogo');
+const catSelectArea = document.getElementById('cat-select-area');
+const formCatalogoPersona = document.getElementById('form-catalogo-persona');
+const tituloFormCat = document.getElementById('titulo-form-cat');
+const inputCatEditIndex = document.getElementById('cat-edit-index');
+const inputCatNombre = document.getElementById('cat-nombre');
+const inputCatPuesto = document.getElementById('cat-puesto');
+const selectCatTipo = document.getElementById('cat-tipo');
+const catListaPersonal = document.getElementById('cat-lista-personal');
+
+// Modal 5: Sync GitHub
 const modalSync = document.getElementById('modal-sync');
 const inputSyncOwner = document.getElementById('sync-owner');
 const inputSyncRepo = document.getElementById('sync-repo');
@@ -419,7 +678,7 @@ const inputSyncToken = document.getElementById('sync-token');
 const cajaCompartirSync = document.getElementById('caja-compartir-sync');
 
 // =========================================================================
-// 3. UTILIDADES DE FECHA REAL AUTOMÁTICA, ID Y NOTIFICACIONES
+// 3. UTILIDADES DE FECHA, ID, BADGES Y NOTIFICACIONES
 // =========================================================================
 
 function obtenerFechaHoyISO() {
@@ -451,6 +710,24 @@ function calcularSiguienteID() {
   return maxId + 1;
 }
 
+function obtenerClasePlaza(tipo) {
+  const t = (tipo || '').toUpperCase().trim();
+  if (t === 'CONFIANZA') return 'plaza-confianza';
+  if (t === 'SINDICATO') return 'plaza-sindicato';
+  if (t === 'PRACTICANTE') return 'plaza-practicante';
+  return 'plaza-otro';
+}
+
+function esSinNombre(nombre) {
+  return (nombre || '').toUpperCase().includes('SIN NOMBRE');
+}
+
+function escaparHTML(texto) {
+  const div = document.createElement('div');
+  div.textContent = texto ?? '';
+  return div.innerHTML;
+}
+
 function mostrarNotificacion(mensaje, tipo = 'info', accionTexto = null, accionCallback = null) {
   const container = document.getElementById('toast-container');
   const toast = document.createElement('div');
@@ -478,7 +755,173 @@ function mostrarNotificacion(mensaje, tipo = 'info', accionTexto = null, accionC
 }
 
 // =========================================================================
-// 4. LÓGICA DEL FORMULARIO DE ALTA Y VALIDACIONES
+// 4. DESPLIEGUE EN CASCADA (ÁREA -> PERSONAL -> PUESTO Y TIPO CAPTURADO)
+// =========================================================================
+
+function sincronizarAreasEnSelects() {
+  const valorActual = selectArea.value;
+  const areasEnSelect = new Set(Array.from(selectArea.options).map((o) => o.value));
+  const opcionOtra = selectArea.querySelector('option[value="OTRA"]');
+
+  Object.keys(catalogoPersonal).forEach((areaClave) => {
+    if (!areasEnSelect.has(areaClave) && areaClave !== 'OTRA') {
+      const opt = document.createElement('option');
+      opt.value = areaClave;
+      opt.textContent = areaClave;
+      if (opcionOtra) {
+        selectArea.insertBefore(opt, opcionOtra);
+      } else {
+        selectArea.appendChild(opt);
+      }
+      areasEnSelect.add(areaClave);
+    }
+  });
+
+  if (valorActual) selectArea.value = valorActual;
+  editArea.innerHTML = selectArea.innerHTML;
+}
+
+function ocultarFichaPersona() {
+  fichaPersonaCard.classList.add('oculto');
+  detalleNombre.textContent = '—';
+  detallePuesto.textContent = '—';
+  detalleTipo.textContent = '—';
+  detalleTipo.className = 'badge-plaza';
+}
+
+function mostrarFichaPersona(personaObj) {
+  if (!personaObj) {
+    ocultarFichaPersona();
+    return;
+  }
+  detalleNombre.textContent = personaObj.nombre;
+  detallePuesto.textContent = personaObj.puesto || 'Sin puesto definido';
+  detalleTipo.textContent = personaObj.tipo || 'CONFIANZA';
+  detalleTipo.className = `badge-plaza ${obtenerClasePlaza(personaObj.tipo)}`;
+  fichaPersonaCard.classList.remove('oculto');
+}
+
+function desplegarPersonalPorArea(areaSeleccionada, indicePreseleccionado = null) {
+  selectPersona.innerHTML = '';
+  ocultarFichaPersona();
+  grupoOtraPersona.classList.add('oculto');
+  inputOtraPersona.value = '';
+  inputOtraPersonaPuesto.value = '';
+
+  if (!areaSeleccionada) {
+    selectPersona.disabled = true;
+    btnEditarCatalogoInline.classList.add('oculto');
+    const opt = document.createElement('option');
+    opt.value = '';
+    opt.textContent = '-- Primero selecciona un área --';
+    selectPersona.appendChild(opt);
+    return;
+  }
+
+  selectPersona.disabled = false;
+  btnEditarCatalogoInline.classList.remove('oculto');
+
+  if (areaSeleccionada === 'OTRA') {
+    const optDefault = document.createElement('option');
+    optDefault.value = 'OTRA';
+    optDefault.textContent = '+ Especificar nombre manualmente...';
+    selectPersona.appendChild(optDefault);
+    selectPersona.value = 'OTRA';
+    grupoOtraPersona.classList.remove('oculto');
+    return;
+  }
+
+  const lista = catalogoPersonal[areaSeleccionada] || [];
+
+  const optPlaceholder = document.createElement('option');
+  optPlaceholder.value = '';
+  optPlaceholder.textContent =
+    lista.length > 0
+      ? `-- Selecciona personal de ${areaSeleccionada} (${lista.length}) --`
+      : `-- Sin personal registrado en ${areaSeleccionada} --`;
+  selectPersona.appendChild(optPlaceholder);
+
+  lista.forEach((persona, idx) => {
+    const opt = document.createElement('option');
+    opt.value = String(idx);
+    opt.textContent = `${persona.nombre} — [${persona.puesto}] (${persona.tipo})`;
+    selectPersona.appendChild(opt);
+  });
+
+  const optOtro = document.createElement('option');
+  optOtro.value = 'OTRA';
+  optOtro.textContent = '+ Otro / Especificar persona nueva...';
+  selectPersona.appendChild(optOtro);
+
+  if (
+    indicePreseleccionado !== null &&
+    indicePreseleccionado >= 0 &&
+    indicePreseleccionado < lista.length
+  ) {
+    selectPersona.value = String(indicePreseleccionado);
+    mostrarFichaPersona(lista[indicePreseleccionado]);
+  }
+}
+
+selectArea.addEventListener('change', () => {
+  limpiarErrorCampo(selectArea);
+  limpiarErrorCampo(selectPersona);
+
+  const area = selectArea.value;
+  if (area === 'OTRA') {
+    grupoOtraArea.classList.remove('oculto');
+    inputOtraArea.focus();
+  } else {
+    grupoOtraArea.classList.add('oculto');
+    inputOtraArea.value = '';
+    limpiarErrorCampo(inputOtraArea);
+  }
+
+  desplegarPersonalPorArea(area);
+});
+
+selectPersona.addEventListener('change', () => {
+  limpiarErrorCampo(selectPersona);
+  const val = selectPersona.value;
+
+  if (val === 'OTRA') {
+    ocultarFichaPersona();
+    grupoOtraPersona.classList.remove('oculto');
+    inputOtraPersona.focus();
+    return;
+  }
+
+  grupoOtraPersona.classList.add('oculto');
+  inputOtraPersona.value = '';
+  inputOtraPersonaPuesto.value = '';
+  limpiarErrorCampo(inputOtraPersona);
+
+  if (val === '') {
+    ocultarFichaPersona();
+    return;
+  }
+
+  const area = selectArea.value;
+  const lista = catalogoPersonal[area] || [];
+  const persona = lista[Number(val)];
+  mostrarFichaPersona(persona);
+});
+
+// Botón directo en la ficha para editar si alguien renunció o estaba SIN NOMBRE
+btnModificarPersonaActual.addEventListener('click', () => {
+  const area = selectArea.value;
+  const idx = selectPersona.value;
+  if (!area || area === 'OTRA' || idx === '' || idx === 'OTRA') return;
+  abrirModalCatalogo(area, Number(idx));
+});
+
+btnEditarCatalogoInline.addEventListener('click', () => {
+  const area = selectArea.value && selectArea.value !== 'OTRA' ? selectArea.value : null;
+  abrirModalCatalogo(area, null);
+});
+
+// =========================================================================
+// 5. LÓGICA DEL FORMULARIO DE ALTA Y VALIDACIONES
 // =========================================================================
 
 function inicializarFormulario() {
@@ -494,41 +937,6 @@ function verificarCambioDeDiaAutomatico() {
     inputFecha.value = hoy;
   }
 }
-
-selectArea.addEventListener('change', () => {
-  limpiarErrorCampo(selectArea);
-
-  if (selectArea.value === 'OTRA') {
-    grupoOtraArea.classList.remove('oculto');
-    inputOtraArea.focus();
-  } else {
-    grupoOtraArea.classList.add('oculto');
-    inputOtraArea.value = '';
-    limpiarErrorCampo(inputOtraArea);
-  }
-
-  // Sugerir automáticamente el jefe ficticio del área elegida (editable por el usuario)
-  const jefeSugerido = MAPA_JEFES_POR_AREA[selectArea.value];
-  if (jefeSugerido) {
-    selectPersona.value = jefeSugerido;
-    grupoOtraPersona.classList.add('oculto');
-    inputOtraPersona.value = '';
-    limpiarErrorCampo(selectPersona);
-    limpiarErrorCampo(inputOtraPersona);
-  }
-});
-
-selectPersona.addEventListener('change', () => {
-  limpiarErrorCampo(selectPersona);
-  if (selectPersona.value === 'OTRA') {
-    grupoOtraPersona.classList.remove('oculto');
-    inputOtraPersona.focus();
-  } else {
-    grupoOtraPersona.classList.add('oculto');
-    inputOtraPersona.value = '';
-    limpiarErrorCampo(inputOtraPersona);
-  }
-});
 
 function marcarErrorCampo(elemento) {
   const grupo = elemento.closest('.form-group');
@@ -601,10 +1009,48 @@ formSolicitud.addEventListener('submit', (e) => {
   }
 
   const fechaISO = inputFecha.value || obtenerFechaHoyISO();
-  const areaFinal =
-    selectArea.value === 'OTRA' ? inputOtraArea.value.trim() : selectArea.value;
-  const personaFinal =
-    selectPersona.value === 'OTRA' ? inputOtraPersona.value.trim() : selectPersona.value;
+  const esAreaNueva = selectArea.value === 'OTRA';
+  const areaFinal = esAreaNueva
+    ? inputOtraArea.value.trim().toUpperCase()
+    : selectArea.value;
+
+  let personaFinal = '';
+  let puestoFinal = '';
+  let tipoPlazaFinal = 'CONFIANZA';
+
+  if (selectPersona.value === 'OTRA') {
+    personaFinal = inputOtraPersona.value.trim();
+    puestoFinal = inputOtraPersonaPuesto.value.trim() || 'NO ESPECIFICADO';
+    tipoPlazaFinal = selectOtraPersonaTipo.value || 'CONFIANZA';
+
+    // Si marcó "Guardar en el catálogo de esta área", se agrega automáticamente
+    if (checkGuardarEnCatalogo.checked && areaFinal) {
+      if (!catalogoPersonal[areaFinal]) {
+        catalogoPersonal[areaFinal] = [];
+      }
+      const yaExiste = catalogoPersonal[areaFinal].some(
+        (p) =>
+          p.nombre.toLowerCase() === personaFinal.toLowerCase() &&
+          p.puesto.toLowerCase() === puestoFinal.toLowerCase()
+      );
+      if (!yaExiste) {
+        catalogoPersonal[areaFinal].push({
+          nombre: personaFinal,
+          puesto: puestoFinal,
+          tipo: tipoPlazaFinal
+        });
+        guardarCatalogo(catalogoPersonal);
+        sincronizarAreasEnSelects();
+      }
+    }
+  } else {
+    const lista = catalogoPersonal[areaFinal] || [];
+    const personaObj = lista[Number(selectPersona.value)];
+    personaFinal = personaObj ? personaObj.nombre : 'No especificado';
+    puestoFinal = personaObj ? personaObj.puesto : 'No especificado';
+    tipoPlazaFinal = personaObj ? personaObj.tipo : 'CONFIANZA';
+  }
+
   const tipoServicio = document.querySelector('input[name="tipoServicio"]:checked').value;
 
   const nuevaTarea = {
@@ -612,6 +1058,8 @@ formSolicitud.addEventListener('submit', (e) => {
     Fecha_Solicitud: formatearFechaDDMMAAAA(fechaISO),
     Area_Solicitante: areaFinal,
     Solicitante: personaFinal,
+    Puesto_Solicitante: puestoFinal,
+    Tipo_Plaza: tipoPlazaFinal,
     Equipo_Afectado: inputEquipo.value.trim(),
     Tipo_Servicio: tipoServicio,
     Descripcion_Falla: textareaDescripcion.value.trim(),
@@ -630,6 +1078,9 @@ function resetearFormulario() {
   formSolicitud.reset();
   grupoOtraArea.classList.add('oculto');
   grupoOtraPersona.classList.add('oculto');
+  ocultarFichaPersona();
+  desplegarPersonalPorArea('');
+  checkGuardarEnCatalogo.checked = true;
   document.querySelectorAll('.form-group.invalido').forEach((g) => g.classList.remove('invalido'));
   inicializarFormulario();
 }
@@ -637,7 +1088,7 @@ function resetearFormulario() {
 document.getElementById('btn-limpiar').addEventListener('click', resetearFormulario);
 
 // =========================================================================
-// 5. RENDERIZADO DEL TABLERO, MÉTRICAS Y FILTROS
+// 6. RENDERIZADO DEL TABLERO, MÉTRICAS Y FILTROS
 // =========================================================================
 
 function actualizarKPIs() {
@@ -659,12 +1110,6 @@ function obtenerClaseBadgeEstado(estado) {
   return 'badge-pendiente';
 }
 
-function escaparHTML(texto) {
-  const div = document.createElement('div');
-  div.textContent = texto;
-  return div.innerHTML;
-}
-
 function renderizarTablero() {
   actualizarKPIs();
   previewId.textContent = `#${calcularSiguienteID()}`;
@@ -682,15 +1127,19 @@ function renderizarTablero() {
 
   const filtradas = tareas.filter((t) => {
     const solicitanteStr = (t.Solicitante || '').toLowerCase();
+    const puestoStr = (t.Puesto_Solicitante || '').toLowerCase();
+    const plazaStr = (t.Tipo_Plaza || '').toLowerCase();
     const coincideEstado = estadoFiltro === 'TODOS' || t.Estado_Seguimiento === estadoFiltro;
     const coincideTipo = tipoFiltro === 'TODOS' || t.Tipo_Servicio === tipoFiltro;
     const coincideTexto =
       !textoFiltro ||
       String(t.ID_Tarea).includes(textoFiltro) ||
-      t.Area_Solicitante.toLowerCase().includes(textoFiltro) ||
+      (t.Area_Solicitante || '').toLowerCase().includes(textoFiltro) ||
       solicitanteStr.includes(textoFiltro) ||
-      t.Equipo_Afectado.toLowerCase().includes(textoFiltro) ||
-      t.Descripcion_Falla.toLowerCase().includes(textoFiltro);
+      puestoStr.includes(textoFiltro) ||
+      plazaStr.includes(textoFiltro) ||
+      (t.Equipo_Afectado || '').toLowerCase().includes(textoFiltro) ||
+      (t.Descripcion_Falla || '').toLowerCase().includes(textoFiltro);
 
     return coincideEstado && coincideTipo && coincideTexto;
   });
@@ -706,7 +1155,7 @@ function renderizarTablero() {
   if (filtradas.length === 0) {
     tablaBody.innerHTML = `
       <tr class="fila-vacia">
-        <td colspan="9" style="text-align:center; padding: 24px; color: #64748b;">
+        <td colspan="10" style="text-align:center; padding: 24px; color: #64748b;">
           No se encontraron tareas que coincidan con los filtros aplicados.
         </td>
       </tr>`;
@@ -714,17 +1163,32 @@ function renderizarTablero() {
   }
 
   tablaBody.innerHTML = filtradas
-    .map(
-      (tarea) => `
+    .map((tarea) => {
+      const nombreSolicitante = tarea.Solicitante || 'No especificado';
+      const puestoSolicitante = tarea.Puesto_Solicitante || '—';
+      const tipoPlaza = tarea.Tipo_Plaza || '';
+      const claseSinNombre = esSinNombre(nombreSolicitante) ? ' sin-nombre-tag' : '';
+
+      return `
       <tr>
         <td data-label="Folio" class="col-id"><strong>#${tarea.ID_Tarea}</strong></td>
         <td data-label="Fecha">${escaparHTML(tarea.Fecha_Solicitud)}</td>
         <td data-label="Área">${escaparHTML(tarea.Area_Solicitante)}</td>
         <td data-label="Solicitante" class="col-solicitante">
-          <span class="solicitante-pill">${escaparHTML(tarea.Solicitante || 'No especificado')}</span>
+          <span class="solicitante-pill${claseSinNombre}">${escaparHTML(nombreSolicitante)}</span>
+        </td>
+        <td data-label="Puesto / Tipo">
+          <div class="puesto-cell">
+            <span class="puesto-texto">${escaparHTML(puestoSolicitante)}</span>
+            ${
+              tipoPlaza
+                ? `<span class="badge-plaza ${obtenerClasePlaza(tipoPlaza)}">${escaparHTML(tipoPlaza)}</span>`
+                : ''
+            }
+          </div>
         </td>
         <td data-label="Equipo">${escaparHTML(tarea.Equipo_Afectado)}</td>
-        <td data-label="Tipo"><span class="badge badge-tipo">${escaparHTML(tarea.Tipo_Servicio)}</span></td>
+        <td data-label="Servicio"><span class="badge badge-tipo">${escaparHTML(tarea.Tipo_Servicio)}</span></td>
         <td data-label="Descripción de la Falla" class="col-desc">${escaparHTML(tarea.Descripcion_Falla)}</td>
         <td data-label="Estado">
           <span class="badge ${obtenerClaseBadgeEstado(tarea.Estado_Seguimiento)}">
@@ -745,8 +1209,8 @@ function renderizarTablero() {
           </div>
         </td>
       </tr>
-    `
-    )
+    `;
+    })
     .join('');
 }
 
@@ -755,7 +1219,7 @@ filtroEstado.addEventListener('change', renderizarTablero);
 filtroTipo.addEventListener('change', renderizarTablero);
 
 // =========================================================================
-// 6. MODALES: EDITAR REGISTRO COMPLETO, ESTADO RÁPIDO Y ELIMINAR
+// 7. MODALES: ESTADO RÁPIDO, EDICIÓN COMPLETA Y ELIMINACIÓN
 // =========================================================================
 
 // --- A. Modal de Estado Rápido ---
@@ -767,6 +1231,9 @@ window.abrirModalEstado = function (idTarea) {
   document.getElementById('modal-id-tarea').textContent = `#${tarea.ID_Tarea}`;
   document.getElementById('modal-area').textContent = tarea.Area_Solicitante;
   document.getElementById('modal-solicitante').textContent = tarea.Solicitante || 'No especificado';
+
+  const puestoTipoStr = [tarea.Puesto_Solicitante, tarea.Tipo_Plaza].filter(Boolean).join(' · ');
+  document.getElementById('modal-puesto-tipo').textContent = puestoTipoStr || 'No especificado';
   document.getElementById('modal-equipo').textContent = tarea.Equipo_Afectado;
   selectNuevoEstado.value = tarea.Estado_Seguimiento;
 
@@ -805,35 +1272,114 @@ document.getElementById('btn-confirmar-estado').addEventListener('click', () => 
   cerrarModalEstado();
 });
 
-// --- B. Modal de Edición / Modificación Completa ---
-function poblarSelectsEdicion() {
-  editArea.innerHTML = selectArea.innerHTML;
-  editPersona.innerHTML = selectPersona.innerHTML;
+// --- B. Modal de Edición Completa (Cascada Área -> Persona -> Puesto/Tipo) ---
+function poblarPersonalEnModalEdicion(area, nombreActual = '', puestoActual = '', tipoActual = 'CONFIANZA') {
+  editPersona.innerHTML = '';
+
+  if (!area || area === 'OTRA') {
+    const optOtro = document.createElement('option');
+    optOtro.value = 'OTRA';
+    optOtro.textContent = '+ Especificar nombre manualmente...';
+    editPersona.appendChild(optOtro);
+    editPersona.value = 'OTRA';
+    editGrupoOtraPersona.classList.remove('oculto');
+    editOtraPersonaTexto.value = nombreActual;
+    editPuesto.value = puestoActual;
+    editTipoPlaza.value = tipoActual || 'CONFIANZA';
+    return;
+  }
+
+  const lista = catalogoPersonal[area] || [];
+  const optDefault = document.createElement('option');
+  optDefault.value = '';
+  optDefault.textContent = `-- Selecciona personal de ${area} --`;
+  editPersona.appendChild(optDefault);
+
+  let indiceEncontrado = -1;
+  lista.forEach((p, idx) => {
+    const opt = document.createElement('option');
+    opt.value = String(idx);
+    opt.textContent = `${p.nombre} — [${p.puesto}] (${p.tipo})`;
+    editPersona.appendChild(opt);
+
+    if (
+      indiceEncontrado === -1 &&
+      p.nombre.toLowerCase() === (nombreActual || '').toLowerCase() &&
+      (!puestoActual || p.puesto.toLowerCase() === puestoActual.toLowerCase())
+    ) {
+      indiceEncontrado = idx;
+    }
+  });
+
+  if (indiceEncontrado === -1 && nombreActual) {
+    indiceEncontrado = lista.findIndex(
+      (p) => p.nombre.toLowerCase() === nombreActual.toLowerCase()
+    );
+  }
+
+  const optOtro = document.createElement('option');
+  optOtro.value = 'OTRA';
+  optOtro.textContent = '+ Otro / Especificar manualmente...';
+  editPersona.appendChild(optOtro);
+
+  if (indiceEncontrado !== -1) {
+    editPersona.value = String(indiceEncontrado);
+    editGrupoOtraPersona.classList.add('oculto');
+    editOtraPersonaTexto.value = '';
+    editPuesto.value = puestoActual || lista[indiceEncontrado].puesto;
+    editTipoPlaza.value = tipoActual || lista[indiceEncontrado].tipo;
+  } else if (nombreActual) {
+    editPersona.value = 'OTRA';
+    editGrupoOtraPersona.classList.remove('oculto');
+    editOtraPersonaTexto.value = nombreActual;
+    editPuesto.value = puestoActual || '';
+    editTipoPlaza.value = tipoActual || 'CONFIANZA';
+  } else {
+    editPersona.value = '';
+    editGrupoOtraPersona.classList.add('oculto');
+    editOtraPersonaTexto.value = '';
+    editPuesto.value = '';
+    editTipoPlaza.value = 'CONFIANZA';
+  }
 }
 
 editArea.addEventListener('change', () => {
-  if (editArea.value === 'OTRA') {
+  const area = editArea.value;
+  if (area === 'OTRA') {
     editGrupoOtraArea.classList.remove('oculto');
     editOtraAreaTexto.focus();
   } else {
     editGrupoOtraArea.classList.add('oculto');
     editOtraAreaTexto.value = '';
   }
+  poblarPersonalEnModalEdicion(area, '', '', 'CONFIANZA');
 });
 
 editPersona.addEventListener('change', () => {
-  if (editPersona.value === 'OTRA') {
+  const val = editPersona.value;
+  if (val === 'OTRA') {
     editGrupoOtraPersona.classList.remove('oculto');
     editOtraPersonaTexto.focus();
-  } else {
-    editGrupoOtraPersona.classList.add('oculto');
-    editOtraPersonaTexto.value = '';
+    return;
+  }
+
+  editGrupoOtraPersona.classList.add('oculto');
+  editOtraPersonaTexto.value = '';
+
+  const area = editArea.value;
+  const lista = catalogoPersonal[area] || [];
+  const p = lista[Number(val)];
+  if (p) {
+    editPuesto.value = p.puesto || '';
+    editTipoPlaza.value = p.tipo || 'CONFIANZA';
   }
 });
 
 window.abrirModalEditar = function (idTarea) {
   const tarea = tareas.find((t) => Number(t.ID_Tarea) === Number(idTarea));
   if (!tarea) return;
+
+  sincronizarAreasEnSelects();
 
   idTareaModificando = Number(tarea.ID_Tarea);
   document.getElementById('edit-folio-titulo').textContent = `#${tarea.ID_Tarea}`;
@@ -848,7 +1394,6 @@ window.abrirModalEditar = function (idTarea) {
   );
   if (radioTipo) radioTipo.checked = true;
 
-  // Área
   const existeAreaEnLista = Array.from(editArea.options).some(
     (opt) => opt.value === tarea.Area_Solicitante && opt.value !== 'OTRA'
   );
@@ -857,30 +1402,22 @@ window.abrirModalEditar = function (idTarea) {
     editArea.value = tarea.Area_Solicitante;
     editGrupoOtraArea.classList.add('oculto');
     editOtraAreaTexto.value = '';
+    poblarPersonalEnModalEdicion(
+      tarea.Area_Solicitante,
+      tarea.Solicitante || '',
+      tarea.Puesto_Solicitante || '',
+      tarea.Tipo_Plaza || 'CONFIANZA'
+    );
   } else {
     editArea.value = 'OTRA';
     editGrupoOtraArea.classList.remove('oculto');
     editOtraAreaTexto.value = tarea.Area_Solicitante || '';
-  }
-
-  // Solicitante
-  const solicitanteActual = tarea.Solicitante || '';
-  const existePersonaEnLista = Array.from(editPersona.options).some(
-    (opt) => opt.value === solicitanteActual && opt.value !== 'OTRA'
-  );
-
-  if (!solicitanteActual) {
-    editPersona.value = '';
-    editGrupoOtraPersona.classList.add('oculto');
-    editOtraPersonaTexto.value = '';
-  } else if (existePersonaEnLista) {
-    editPersona.value = solicitanteActual;
-    editGrupoOtraPersona.classList.add('oculto');
-    editOtraPersonaTexto.value = '';
-  } else {
-    editPersona.value = 'OTRA';
-    editGrupoOtraPersona.classList.remove('oculto');
-    editOtraPersonaTexto.value = solicitanteActual;
+    poblarPersonalEnModalEdicion(
+      'OTRA',
+      tarea.Solicitante || '',
+      tarea.Puesto_Solicitante || '',
+      tarea.Tipo_Plaza || 'CONFIANZA'
+    );
   }
 
   modalEditar.classList.remove('oculto');
@@ -902,9 +1439,21 @@ formEditarTarea.addEventListener('submit', (e) => {
   if (idTareaModificando === null) return;
 
   const areaFinal =
-    editArea.value === 'OTRA' ? editOtraAreaTexto.value.trim() : editArea.value;
-  const personaFinal =
-    editPersona.value === 'OTRA' ? editOtraPersonaTexto.value.trim() : editPersona.value;
+    editArea.value === 'OTRA'
+      ? editOtraAreaTexto.value.trim().toUpperCase()
+      : editArea.value;
+
+  let personaFinal = '';
+  if (editPersona.value === 'OTRA') {
+    personaFinal = editOtraPersonaTexto.value.trim();
+  } else if (editPersona.value !== '') {
+    const lista = catalogoPersonal[areaFinal] || [];
+    const p = lista[Number(editPersona.value)];
+    personaFinal = p ? p.nombre : '';
+  }
+
+  const puestoFinal = editPuesto.value.trim() || 'NO ESPECIFICADO';
+  const tipoPlazaFinal = editTipoPlaza.value || 'CONFIANZA';
   const equipoFinal = editEquipo.value.trim();
   const descripcionFinal = editDescripcion.value.trim();
   const tipoRadio = document.querySelector('input[name="editTipoServicio"]:checked');
@@ -921,6 +1470,8 @@ formEditarTarea.addEventListener('submit', (e) => {
       Fecha_Solicitud: formatearFechaDDMMAAAA(editFecha.value),
       Area_Solicitante: areaFinal,
       Solicitante: personaFinal,
+      Puesto_Solicitante: puestoFinal,
+      Tipo_Plaza: tipoPlazaFinal,
       Equipo_Afectado: equipoFinal,
       Tipo_Servicio: tipoRadio.value,
       Descripcion_Falla: descripcionFinal,
@@ -935,7 +1486,7 @@ formEditarTarea.addEventListener('submit', (e) => {
   cerrarModalEditar();
 });
 
-// --- C. Modal de Eliminación (Compatible con iPhone y Android) ---
+// --- C. Modal de Eliminación ---
 window.abrirModalEliminar = function (idTarea) {
   const tarea = tareas.find((t) => Number(t.ID_Tarea) === Number(idTarea));
   if (!tarea) return;
@@ -972,7 +1523,211 @@ document.getElementById('btn-confirmar-eliminar').addEventListener('click', () =
 });
 
 // =========================================================================
-// 7. GENERADOR DE EXCEL .XLSX CON FORMATO INSTITUCIONAL
+// 8. MODAL 4: DIRECTORIO / CATÁLOGO DE PERSONAL (EDITAR, RELEVO, AGREGAR)
+// =========================================================================
+
+function poblarSelectAreasCatalogo(areaPreseleccionada = null) {
+  const areas = Object.keys(catalogoPersonal);
+  catSelectArea.innerHTML = areas
+    .map((area) => `<option value="${escaparHTML(area)}">${escaparHTML(area)}</option>`)
+    .join('');
+
+  if (areaPreseleccionada && catalogoPersonal[areaPreseleccionada]) {
+    catSelectArea.value = areaPreseleccionada;
+  }
+}
+
+function renderizarTablaCatalogo() {
+  const area = catSelectArea.value;
+  const lista = catalogoPersonal[area] || [];
+
+  if (lista.length === 0) {
+    catListaPersonal.innerHTML = `
+      <tr>
+        <td colspan="4" style="text-align:center; padding: 20px; color: #64748b;">
+          No hay personal registrado en esta área. Haz clic en "+ Agregar Persona a esta Área".
+        </td>
+      </tr>`;
+    return;
+  }
+
+  catListaPersonal.innerHTML = lista
+    .map((p, idx) => {
+      const sinNom = esSinNombre(p.nombre);
+      return `
+        <tr class="${sinNom ? 'row-sin-nombre' : ''}">
+          <td>
+            ${
+              sinNom
+                ? `<span class="badge-sin-nombre">${escaparHTML(p.nombre)}</span>`
+                : `<strong>${escaparHTML(p.nombre)}</strong>`
+            }
+          </td>
+          <td>${escaparHTML(p.puesto)}</td>
+          <td>
+            <span class="badge-plaza ${obtenerClasePlaza(p.tipo)}">${escaparHTML(p.tipo)}</span>
+          </td>
+          <td>
+            <div class="action-btns">
+              <button type="button" class="btn-sm btn-edit" onclick="editarPersonaEnCatalogo(${idx})">
+                Editar
+              </button>
+              <button type="button" class="btn-sm btn-danger" onclick="eliminarPersonaDeCatalogo(${idx})">
+                Quitar
+              </button>
+            </div>
+          </td>
+        </tr>
+      `;
+    })
+    .join('');
+}
+
+function abrirFormCatalogo(indice = -1) {
+  const area = catSelectArea.value;
+  const lista = catalogoPersonal[area] || [];
+  inputCatEditIndex.value = String(indice);
+
+  if (indice >= 0 && lista[indice]) {
+    tituloFormCat.textContent = `Modificar registro en ${area}`;
+    inputCatNombre.value = lista[indice].nombre;
+    inputCatPuesto.value = lista[indice].puesto;
+    selectCatTipo.value = lista[indice].tipo || 'CONFIANZA';
+  } else {
+    tituloFormCat.textContent = `Agregar nuevo personal a ${area}`;
+    inputCatNombre.value = '';
+    inputCatPuesto.value = '';
+    selectCatTipo.value = 'CONFIANZA';
+  }
+
+  formCatalogoPersona.classList.remove('oculto');
+  inputCatNombre.focus();
+  inputCatNombre.select();
+}
+
+function cerrarFormCatalogo() {
+  formCatalogoPersona.classList.add('oculto');
+  inputCatEditIndex.value = '-1';
+  formCatalogoPersona.reset();
+}
+
+function abrirModalCatalogo(areaPreseleccionada = null, indicePersonaEditar = null) {
+  poblarSelectAreasCatalogo(areaPreseleccionada || selectArea.value || null);
+  renderizarTablaCatalogo();
+  cerrarFormCatalogo();
+
+  modalCatalogo.classList.remove('oculto');
+
+  if (indicePersonaEditar !== null && indicePersonaEditar >= 0) {
+    abrirFormCatalogo(indicePersonaEditar);
+  }
+}
+
+function cerrarModalCatalogo() {
+  cerrarFormCatalogo();
+  modalCatalogo.classList.add('oculto');
+}
+
+window.editarPersonaEnCatalogo = function (indice) {
+  abrirFormCatalogo(indice);
+};
+
+window.eliminarPersonaDeCatalogo = function (indice) {
+  const area = catSelectArea.value;
+  const lista = catalogoPersonal[area] || [];
+  const persona = lista[indice];
+  if (!persona) return;
+
+  lista.splice(indice, 1);
+  catalogoPersonal[area] = lista;
+  guardarCatalogo(catalogoPersonal);
+  renderizarTablaCatalogo();
+
+  if (selectArea.value === area) {
+    desplegarPersonalPorArea(area);
+  }
+
+  mostrarNotificacion(`"${persona.nombre}" eliminado del área ${area}.`, 'info');
+};
+
+document.getElementById('btn-abrir-catalogo').addEventListener('click', () => {
+  abrirModalCatalogo();
+});
+
+document.getElementById('btn-cerrar-catalogo').addEventListener('click', cerrarModalCatalogo);
+document.getElementById('btn-cerrar-catalogo-footer').addEventListener('click', cerrarModalCatalogo);
+modalCatalogo.addEventListener('click', (e) => {
+  if (e.target === modalCatalogo) cerrarModalCatalogo();
+});
+
+catSelectArea.addEventListener('change', () => {
+  cerrarFormCatalogo();
+  renderizarTablaCatalogo();
+});
+
+document.getElementById('btn-nuevo-personal-cat').addEventListener('click', () => {
+  abrirFormCatalogo(-1);
+});
+
+document.getElementById('btn-cancelar-form-cat').addEventListener('click', cerrarFormCatalogo);
+
+formCatalogoPersona.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const area = catSelectArea.value;
+  if (!area) return;
+
+  const nombre = inputCatNombre.value.trim();
+  const puesto = inputCatPuesto.value.trim();
+  const tipo = selectCatTipo.value || 'CONFIANZA';
+  const indice = Number(inputCatEditIndex.value);
+
+  if (!nombre || !puesto) {
+    mostrarNotificacion('Escribe tanto el nombre como el puesto.', 'error');
+    return;
+  }
+
+  if (!catalogoPersonal[area]) {
+    catalogoPersonal[area] = [];
+  }
+
+  let indiceFinalSeleccionado = indice;
+
+  if (indice >= 0 && catalogoPersonal[area][indice]) {
+    catalogoPersonal[area][indice] = { nombre, puesto, tipo };
+    mostrarNotificacion(`Datos actualizados en ${area}.`, 'success');
+  } else {
+    catalogoPersonal[area].push({ nombre, puesto, tipo });
+    indiceFinalSeleccionado = catalogoPersonal[area].length - 1;
+    mostrarNotificacion(`"${nombre}" agregado a ${area}.`, 'success');
+  }
+
+  guardarCatalogo(catalogoPersonal);
+  cerrarFormCatalogo();
+  renderizarTablaCatalogo();
+
+  // Si el usuario estaba trabajando sobre esa misma área en el formulario principal, se refresca al instante
+  if (selectArea.value === area) {
+    desplegarPersonalPorArea(area, indiceFinalSeleccionado);
+  }
+});
+
+document.getElementById('btn-restaurar-catalogo').addEventListener('click', () => {
+  catalogoPersonal = clonarObjeto(CATALOGO_PERSONAL_BASE);
+  guardarCatalogo(catalogoPersonal);
+  sincronizarAreasEnSelects();
+  poblarSelectAreasCatalogo(catSelectArea.value);
+  renderizarTablaCatalogo();
+  cerrarFormCatalogo();
+
+  if (selectArea.value) {
+    desplegarPersonalPorArea(selectArea.value);
+  }
+
+  mostrarNotificacion('Directorio restaurado a la lista original del Excel.', 'info');
+});
+
+// =========================================================================
+// 9. GENERADOR DE EXCEL .XLSX CON FORMATO INSTITUCIONAL
 // =========================================================================
 
 function exportarHistorialAExcel() {
@@ -1037,25 +1792,27 @@ function exportarHistorialAExcel() {
     const filas = [
       [
         { v: 'H. AYUNTAMIENTO CONSTITUCIONAL DE RÍO BLANCO, VERACRUZ', s: estiloTitulo },
-        '', '', '', '', '', '', ''
+        '', '', '', '', '', '', '', '', ''
       ],
       [
         { v: 'DEPARTAMENTO DE SISTEMAS — REPORTE DE CONTROL Y SEGUIMIENTO DE TAREAS TÉCNICAS', s: estiloSubtitulo },
-        '', '', '', '', '', '', ''
+        '', '', '', '', '', '', '', '', ''
       ],
       [
         {
           v: `Fecha de emisión: ${fechaEmision}   |   Total: ${total}   |   Pendientes: ${pendientes}   |   En proceso: ${enProceso}   |   Terminadas: ${terminados}`,
           s: estiloMeta
         },
-        '', '', '', '', '', '', ''
+        '', '', '', '', '', '', '', '', ''
       ],
-      ['', '', '', '', '', '', '', ''],
+      ['', '', '', '', '', '', '', '', '', ''],
       [
         { v: 'ID_Tarea', s: estiloHeaderTabla },
         { v: 'Fecha_Solicitud', s: estiloHeaderTabla },
         { v: 'Area_Solicitante', s: estiloHeaderTabla },
         { v: 'Solicitante', s: estiloHeaderTabla },
+        { v: 'Puesto_Solicitante', s: estiloHeaderTabla },
+        { v: 'Tipo_Plaza', s: estiloHeaderTabla },
         { v: 'Equipo_Afectado', s: estiloHeaderTabla },
         { v: 'Tipo_Servicio', s: estiloHeaderTabla },
         { v: 'Descripcion_Falla', s: estiloHeaderTabla },
@@ -1081,16 +1838,16 @@ function exportarHistorialAExcel() {
         border: bordeDelgado
       };
 
+      const estiloCentrado = {
+        ...estiloBase,
+        alignment: { horizontal: 'center', vertical: 'center' }
+      };
+
       const estiloID = {
         font: { name: 'Calibri', sz: 10, bold: true, color: { rgb: '003B75' } },
         fill: { patternType: 'solid', fgColor: { rgb: bgFila } },
         alignment: { horizontal: 'center', vertical: 'center' },
         border: bordeDelgado
-      };
-
-      const estiloFecha = {
-        ...estiloBase,
-        alignment: { horizontal: 'center', vertical: 'center' }
       };
 
       const esHardware = t.Tipo_Servicio === 'Hardware';
@@ -1128,9 +1885,11 @@ function exportarHistorialAExcel() {
 
       filas.push([
         { v: Number(t.ID_Tarea), t: 'n', z: '"#"0', s: estiloID },
-        { v: t.Fecha_Solicitud, t: 's', s: estiloFecha },
+        { v: t.Fecha_Solicitud, t: 's', s: estiloCentrado },
         { v: t.Area_Solicitante, t: 's', s: estiloBase },
         { v: t.Solicitante || 'No especificado', t: 's', s: estiloBase },
+        { v: t.Puesto_Solicitante || 'No especificado', t: 's', s: estiloBase },
+        { v: t.Tipo_Plaza || 'CONFIANZA', t: 's', s: estiloCentrado },
         { v: t.Equipo_Afectado, t: 's', s: estiloBase },
         { v: t.Tipo_Servicio, t: 's', s: estiloTipo },
         { v: t.Descripcion_Falla, t: 's', s: estiloBase },
@@ -1164,6 +1923,8 @@ function exportarHistorialAExcel() {
       { v: '', s: estiloPie },
       { v: '', s: estiloPie },
       { v: '', s: estiloPie },
+      { v: '', s: estiloPie },
+      { v: '', s: estiloPie },
       { v: '', s: estiloPie }
     ]);
     alturasFilas.push({ hpt: 22 });
@@ -1172,24 +1933,26 @@ function exportarHistorialAExcel() {
 
     const filaFinalIdx = filas.length - 1;
     hojaHistorial['!merges'] = [
-      { s: { r: 0, c: 0 }, e: { r: 0, c: 7 } },
-      { s: { r: 1, c: 0 }, e: { r: 1, c: 7 } },
-      { s: { r: 2, c: 0 }, e: { r: 2, c: 7 } },
-      { s: { r: filaFinalIdx, c: 0 }, e: { r: filaFinalIdx, c: 7 } }
+      { s: { r: 0, c: 0 }, e: { r: 0, c: 9 } },
+      { s: { r: 1, c: 0 }, e: { r: 1, c: 9 } },
+      { s: { r: 2, c: 0 }, e: { r: 2, c: 9 } },
+      { s: { r: filaFinalIdx, c: 0 }, e: { r: filaFinalIdx, c: 9 } }
     ];
 
     hojaHistorial['!cols'] = [
       { wch: 11 },
-      { wch: 16 },
-      { wch: 28 },
-      { wch: 30 },
-      { wch: 24 },
       { wch: 15 },
-      { wch: 50 },
-      { wch: 19 }
+      { wch: 26 },
+      { wch: 24 },
+      { wch: 26 },
+      { wch: 15 },
+      { wch: 24 },
+      { wch: 14 },
+      { wch: 48 },
+      { wch: 18 }
     ];
     hojaHistorial['!rows'] = alturasFilas;
-    hojaHistorial['!autofilter'] = { ref: `A5:H${5 + total}` };
+    hojaHistorial['!autofilter'] = { ref: `A5:J${5 + total}` };
 
     const hardwareCount = datosOrdenados.filter((t) => t.Tipo_Servicio === 'Hardware').length;
     const softwareCount = datosOrdenados.filter((t) => t.Tipo_Servicio === 'Software').length;
@@ -1300,7 +2063,7 @@ function exportarHistorialAExcel() {
 document.getElementById('btn-exportar-excel').addEventListener('click', exportarHistorialAExcel);
 
 // =========================================================================
-// 8. CONFIGURACIÓN Y ENLACE RÁPIDO PARA OTROS DISPOSITIVOS
+// 10. CONFIGURACIÓN Y ENLACE RÁPIDO PARA OTROS DISPOSITIVOS (GITHUB SYNC)
 // =========================================================================
 
 function actualizarVisibilidadCompartir() {
@@ -1339,6 +2102,7 @@ document.addEventListener('keydown', (e) => {
     if (!modalEstado.classList.contains('oculto')) cerrarModalEstado();
     if (!modalEditar.classList.contains('oculto')) cerrarModalEditar();
     if (!modalEliminar.classList.contains('oculto')) cerrarModalEliminar();
+    if (!modalCatalogo.classList.contains('oculto')) cerrarModalCatalogo();
     if (!modalSync.classList.contains('oculto')) cerrarModalSync();
   }
 });
@@ -1387,6 +2151,7 @@ document.getElementById('btn-guardar-sync').addEventListener('click', async () =
   if (token) {
     if (tareas.length > 0) {
       await subirTareasAGitHub(tareas);
+      await subirArchivoAGitHub(ARCHIVO_CATALOGO_REMOTO, catalogoPersonal, true);
       mostrarNotificacion('Sincronizado con GitHub correctamente.', 'success');
     } else {
       await sincronizarDesdeGitHub(false);
@@ -1397,12 +2162,13 @@ document.getElementById('btn-guardar-sync').addEventListener('click', async () =
 });
 
 // =========================================================================
-// 9. ARRANQUE INICIAL Y ACTUALIZACIÓN EN SEGUNDO PLANO
+// 11. ARRANQUE INICIAL Y ACTUALIZACIÓN EN SEGUNDO PLANO
 // =========================================================================
 
 document.addEventListener('DOMContentLoaded', async () => {
   capturarTokenDesdeURL();
-  poblarSelectsEdicion();
+  catalogoPersonal = cargarCatalogoLocal();
+  sincronizarAreasEnSelects();
   tareas = obtenerTareasLocal();
   inicializarFormulario();
   renderizarTablero();
