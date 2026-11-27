@@ -14,7 +14,9 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 </head>
 <body>
-  <!-- Encabezado Institucional Compacto con Fondo (leonazul.jpg) y Escudo (leon.png) -->
+  <!-- =================================================================== -->
+  <!-- ENCABEZADO INSTITUCIONAL (CON FONDO leonazul.jpg Y ESCUDO leon.png) -->
+  <!-- =================================================================== -->
   <header class="topbar">
     <div class="container topbar-content">
       <div class="brand">
@@ -34,6 +36,21 @@
       <div class="topbar-right">
         <button
           type="button"
+          class="btn-topbar-glass"
+          id="btn-abrir-catalogo"
+          title="Editar nombres, puestos o agregar personal por área"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" aria-hidden="true">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          <span>Directorio / Personal</span>
+        </button>
+
+        <button
+          type="button"
           class="storage-pill"
           id="indicador-almacenamiento"
           title="Clic para configurar o compartir sincronización automática"
@@ -45,7 +62,9 @@
     </div>
   </header>
 
-  <!-- Contenedor Principal (Pantalla Única) -->
+  <!-- =================================================================== -->
+  <!-- CONTENIDO PRINCIPAL                                                 -->
+  <!-- =================================================================== -->
   <main class="container main-layout">
     <!-- Barra Horizontal de Métricas Rápidas -->
     <section class="kpi-grid" aria-label="Resumen de solicitudes">
@@ -117,11 +136,13 @@
 
     <!-- Zona de Trabajo Distribuida: Formulario (Izquierda) + Tablero (Derecha) -->
     <div class="workspace-grid">
-      <!-- CU-01: Formulario de Registro -->
-      <section class="card form-card" aria-labelledby="titulo-formulario">
+      <!-- =============================================================== -->
+      <!-- COLUMNA IZQUIERDA: REGISTRO DE NUEVA SOLICITUD                  -->
+      <!-- =============================================================== -->
+      <section class="card form-card" aria-labelledby="titulo-form">
         <div class="card-header">
           <div>
-            <h2 id="titulo-formulario">Nueva Solicitud Técnica</h2>
+            <h2 id="titulo-form">Nueva Solicitud Técnica</h2>
             <p class="card-subtitle">Captura digital de soporte a departamentos</p>
           </div>
           <div class="auto-meta">
@@ -131,12 +152,12 @@
         </div>
 
         <form id="form-solicitud" novalidate>
-          <!-- Fila 1 Distribuida: Fecha Automática Real + Tipo de Servicio -->
-          <div class="form-row-2">
+          <!-- Fila 1: Fecha + Tipo de Servicio -->
+          <div class="form-row-2-header">
             <div class="form-group">
               <label for="fecha-solicitud">Fecha de Solicitud <span class="req">*</span></label>
-              <input type="date" id="fecha-solicitud" name="fechaSolicitud" required />
-              <small class="error-msg" id="err-fecha">Selecciona una fecha válida.</small>
+              <input type="date" id="fecha-solicitud" required />
+              <small class="error-msg">Selecciona una fecha válida.</small>
             </div>
 
             <div class="form-group" id="grupo-tipo-servicio">
@@ -160,206 +181,149 @@
                   <span>Software</span>
                 </label>
               </div>
-              <small class="error-msg" id="err-tipo">Elige Hardware o Software.</small>
+              <small class="error-msg">Elige Hardware o Software.</small>
             </div>
           </div>
 
-          <!-- Fila 2: Área Solicitante -->
+          <!-- Paso 1: Área Solicitante -->
           <div class="form-group">
-            <label for="area-solicitante">Área o Departamento Solicitante <span class="req">*</span></label>
-            <select id="area-solicitante" name="areaSolicitante" required>
-              <option value="">-- Selecciona un departamento --</option>
-
-              <optgroup label="Gobierno y Cabildo">
-                <option value="Presidencia">Presidencia</option>
-                <option value="Secretaría (Secretario)">Secretaría (Secretario)</option>
-                <option value="Sindicatura (Síndico)">Sindicatura (Síndico)</option>
-                <option value="Jurídico">Jurídico</option>
-                <option value="Gobernación">Gobernación</option>
-                <option value="Área Cabildo">Área Cabildo</option>
-                <option value="Regidurías Recepción">Regidurías Recepción</option>
-                <option value="Regiduría 1">Regiduría 1</option>
-                <option value="Regiduría 2">Regiduría 2</option>
-                <option value="Regiduría 3">Regiduría 3</option>
-                <option value="Regiduría 4">Regiduría 4</option>
-                <option value="Regiduría 5">Regiduría 5</option>
-                <option value="Regiduría 6">Regiduría 6</option>
-              </optgroup>
-
-              <optgroup label="Finanzas y Administración">
-                <option value="Tesorería">Tesorería</option>
-                <option value="Contabilidad">Contabilidad</option>
-                <option value="Ingresos">Ingresos</option>
-                <option value="Egresos">Egresos</option>
-                <option value="Catastro">Catastro</option>
-                <option value="Recursos Humanos (RH)">Recursos Humanos (RH)</option>
-                <option value="Proveeduría">Proveeduría</option>
-                <option value="Transparencia">Transparencia</option>
-                <option value="Participación Ciudadana">Participación Ciudadana</option>
-                <option value="Recepción General">Recepción General</option>
-              </optgroup>
-
-              <optgroup label="Desarrollo Social y Salud">
-                <option value="Dirección de Desarrollo Social">Dirección de Desarrollo Social</option>
-                <option value="Inmujer">Inmujer</option>
-                <option value="Juventud">Juventud</option>
-                <option value="Salud">Salud</option>
-                <option value="Consultorio Médico">Consultorio Médico</option>
-                <option value="Consultorio Dentista">Consultorio Dentista</option>
-                <option value="CAI">CAI</option>
-                <option value="Casa del Abuelo">Casa del Abuelo</option>
-                <option value="SIPPINA">SIPPINA</option>
-                <option value="Procuraduría">Procuraduría</option>
-                <option value="Psicología">Psicología</option>
-              </optgroup>
-
-              <optgroup label="Sistema DIF Municipal">
-                <option value="Presidencia DIF">Presidencia DIF</option>
-                <option value="Dirección DIF">Dirección DIF</option>
-                <option value="Oficinas DIF">Oficinas DIF</option>
-                <option value="Recepción DIF">Recepción DIF</option>
-                <option value="Psicoterapia DIF">Psicoterapia DIF</option>
-                <option value="Consultorio Dentista DIF">Consultorio Dentista DIF</option>
-              </optgroup>
-
-              <optgroup label="Servicios, Cultura y Deporte">
-                <option value="Obras Públicas">Obras Públicas</option>
-                <option value="Desarrollo Urbano">Desarrollo Urbano</option>
-                <option value="Servicios Municipales">Servicios Municipales</option>
-                <option value="Servicios Ambientales">Servicios Ambientales</option>
-                <option value="Comercio">Comercio</option>
-                <option value="Turismo">Turismo</option>
-                <option value="Protección Civil (PC)">Protección Civil (PC)</option>
-                <option value="Registro Civil">Registro Civil</option>
-                <option value="Transporte Vehicular">Transporte Vehicular</option>
-                <option value="Panteón">Panteón</option>
-                <option value="Biblioteca">Biblioteca</option>
-                <option value="Biblioteca 21 de Marzo">Biblioteca 21 de Marzo</option>
-                <option value="Auditorio MT">Auditorio MT</option>
-                <option value="Deportivo Vicente Guerrero">Deportivo Vicente Guerrero</option>
-                <option value="Ameyal">Ameyal</option>
-              </optgroup>
-
-              <optgroup label="Tecnología y Comunicación">
-                <option value="Sistemas">Sistemas</option>
-                <option value="Comunicación Social">Comunicación Social</option>
-                <option value="Cabina de Radio">Cabina de Radio</option>
-                <option value="Ayuntamiento (General)">Ayuntamiento (General)</option>
-              </optgroup>
-
-              <optgroup label="Escalabilidad">
-                <option value="OTRA">Otra área / Especificar</option>
-              </optgroup>
+            <label for="area-solicitante">1. Área / Departamento Solicitante <span class="req">*</span></label>
+            <select id="area-solicitante" required>
+              <option value="">-- Selecciona un área --</option>
+              <option value="PRESIDENCIA">PRESIDENCIA</option>
+              <option value="SECRETARIO">SECRETARIO</option>
+              <option value="SINDICATURA">SINDICATURA</option>
+              <option value="REGIDURIAS">REGIDURÍAS</option>
+              <option value="TESORERIA">TESORERÍA</option>
+              <option value="CONTADURIA">CONTADURÍA</option>
+              <option value="CONTABILIDAD">CONTABILIDAD</option>
+              <option value="INGRESOS">INGRESOS</option>
+              <option value="EGRESOS">EGRESOS</option>
+              <option value="CATASTRO">CATASTRO</option>
+              <option value="JURIDICO">JURÍDICO</option>
+              <option value="TRANSPARENCIA">TRANSPARENCIA</option>
+              <option value="RRHH">RRHH (Recursos Humanos)</option>
+              <option value="PROVEEDURIA">PROVEEDURÍA</option>
+              <option value="COMUNICACIÓN">COMUNICACIÓN</option>
+              <option value="SISTEMAS">SISTEMAS</option>
+              <option value="GOBERNACION">GOBERNACIÓN</option>
+              <option value="REGISTRO CIVIL">REGISTRO CIVIL</option>
+              <option value="OBRAS PUBLICAS">OBRAS PÚBLICAS</option>
+              <option value="DESARROLLO ECONOMICO Y COMERCIO">DESARROLLO ECONÓMICO Y COMERCIO</option>
+              <option value="DESARROLLO SOCIAL Y HUMANO">DESARROLLO SOCIAL Y HUMANO</option>
+              <option value="SERVICIOS MUNICIPALES">SERVICIOS MUNICIPALES</option>
+              <option value="SERVICIOS AMBIENTALES">SERVICIOS AMBIENTALES</option>
+              <option value="PROTECCION CIVIL">PROTECCIÓN CIVIL</option>
+              <option value="TRANSPORTE">TRANSPORTE</option>
+              <option value="PANTEON">PANTEÓN</option>
+              <option value="PARTICIPACION CIUDADANA">PARTICIPACIÓN CIUDADANA</option>
+              <option value="INMUJER">INMUJER</option>
+              <option value="PRESIDENCIA DIF">PRESIDENCIA DIF</option>
+              <option value="CONSULTORIOS DIF">CONSULTORIOS DIF</option>
+              <option value="SINDICATO">SINDICATO</option>
+              <option value="OTRA">+ Otra área (Especificar...)</option>
             </select>
-            <small class="error-msg" id="err-area">Selecciona el área solicitante.</small>
+            <small class="error-msg">Selecciona el área solicitante.</small>
           </div>
 
-          <!-- Campo libre obligatorio si elige 'Otra área' -->
-          <div class="form-group oculto" id="grupo-otra-area">
-            <label for="otra-area-texto">Especificar Nombre del Área <span class="req">*</span></label>
+          <!-- Campo Condicional: Otra Área -->
+          <div id="grupo-otra-area" class="form-group oculto">
+            <label for="otra-area-texto">Nombre de la Nueva Área <span class="req">*</span></label>
             <input
               type="text"
               id="otra-area-texto"
-              placeholder="Ej. Coordinación de Eventos / Comisión Temporal"
+              placeholder="Ej. Archivo Municipal, Alumbrado Público..."
             />
-            <small class="error-msg" id="err-otra-area">Escribe el nombre del departamento o comisión.</small>
+            <small class="error-msg">Escribe el nombre del área.</small>
           </div>
 
-          <!-- Fila 3: Persona / Solicitante (Jefes, Sindicato, Temporales, Practicantes o Personalizado) -->
+          <!-- Paso 2: Solicitante (Desplegado dinámicamente según el área) -->
           <div class="form-group">
-            <label for="persona-solicitante">Persona / Solicitante <span class="req">*</span></label>
-            <select id="persona-solicitante" name="personaSolicitante" required>
-              <option value="">-- Selecciona responsable, personal o practicante --</option>
-
-              <optgroup label="Personal de Sindicato (Base)">
-                <option value="Personal Sindicalizado — Auxiliar Administrativo">Personal Sindicalizado — Auxiliar Administrativo</option>
-                <option value="Personal Sindicalizado — Secretaria / Recepción">Personal Sindicalizado — Secretaria / Recepción</option>
-                <option value="Personal Sindicalizado — Operativo / Campo">Personal Sindicalizado — Operativo / Campo</option>
-                <option value="Representante Sindical">Representante Sindical</option>
-              </optgroup>
-
-              <optgroup label="Personal Temporal / Eventual">
-                <option value="Personal Temporal — Auxiliar de Oficina">Personal Temporal — Auxiliar de Oficina</option>
-                <option value="Personal Temporal — Apoyo Operativo">Personal Temporal — Apoyo Operativo</option>
-                <option value="Personal Eventual / Comisión">Personal Eventual / Comisión</option>
-              </optgroup>
-
-              <optgroup label="Practicantes y Servicio Social">
-                <option value="Practicante (Residencias / Estadías)">Practicante (Residencias / Estadías)</option>
-                <option value="Prestador de Servicio Social">Prestador de Servicio Social</option>
-                <option value="Becario / Apoyo Estudiantil">Becario / Apoyo Estudiantil</option>
-              </optgroup>
-
-              <optgroup label="Jefes y Encargados de Área">
-                <option value="Lic. Ricardo Antonio Morales (Jefe — Presidencia)">Lic. Ricardo Antonio Morales (Presidencia)</option>
-                <option value="Lic. Alejandro Vega Castellanos (Secretaría)">Lic. Alejandro Vega Castellanos (Secretaría)</option>
-                <option value="Lic. María Fernanda Solís (Sindicatura)">Lic. María Fernanda Solís (Sindicatura)</option>
-                <option value="Lic. Jorge Luis Hernández (Jefe — Jurídico)">Lic. Jorge Luis Hernández (Jurídico)</option>
-                <option value="Lic. Héctor Manuel Ramírez (Jefe — Gobernación)">Lic. Héctor Manuel Ramírez (Gobernación)</option>
-                <option value="C. Patricia Elena Navarro (Encargada — Cabildo)">C. Patricia Elena Navarro (Área Cabildo)</option>
-                <option value="Reg. Gabriela Ortiz Domínguez (Regidurías)">Reg. Gabriela Ortiz Domínguez (Regidurías)</option>
-                <option value="C.P. Roberto Carlos Méndez (Tesorero)">C.P. Roberto Carlos Méndez (Tesorería)</option>
-                <option value="C.P. Ana Laura Domínguez (Jefa — Contabilidad)">C.P. Ana Laura Domínguez (Contabilidad)</option>
-                <option value="Lic. Fernando Javier Cruz (Jefe — Ingresos)">Lic. Fernando Javier Cruz (Ingresos)</option>
-                <option value="C.P. Verónica Guzmán Ríos (Jefa — Egresos)">C.P. Verónica Guzmán Ríos (Egresos)</option>
-                <option value="Ing. Mauricio Paredes Luna (Jefe — Catastro)">Ing. Mauricio Paredes Luna (Catastro)</option>
-                <option value="Lic. Claudia Patricia Reyes (Jefa — RH)">Lic. Claudia Patricia Reyes (Recursos Humanos)</option>
-                <option value="Lic. Eduardo Sánchez Ortega (Jefe — Proveeduría)">Lic. Eduardo Sánchez Ortega (Proveeduría)</option>
-                <option value="Lic. Sofía Alejandra Torres (Jefa — Transparencia)">Lic. Sofía Alejandra Torres (Transparencia)</option>
-                <option value="C. Miguel Ángel Flores (Jefe — Part. Ciudadana)">C. Miguel Ángel Flores (Participación Ciudadana)</option>
-                <option value="C. Daniela Ivette Herrera (Recepción General)">C. Daniela Ivette Herrera (Recepción General)</option>
-                <option value="Lic. Mónica Beatriz Castro (Dir. Desarrollo Social)">Lic. Mónica Beatriz Castro (Desarrollo Social)</option>
-                <option value="Lic. Valeria Jiménez Aguilar (Titular — Inmujer)">Lic. Valeria Jiménez Aguilar (Inmujer)</option>
-                <option value="C. Diego Armando Salazar (Encargado — Juventud)">C. Diego Armando Salazar (Juventud)</option>
-                <option value="Dr. José Luis Peralta (Dir. Salud / Médico)">Dr. José Luis Peralta (Salud / Consultorio Médico)</option>
-                <option value="Dra. Karla Paola Nava (Consultorio Dentista)">Dra. Karla Paola Nava (Consultorio Dentista)</option>
-                <option value="Profra. Rosa María Bautista (Coordinadora — CAI)">Profra. Rosa María Bautista (CAI)</option>
-                <option value="C. Guadalupe Contreras (Encargada — Casa del Abuelo)">C. Guadalupe Contreras (Casa del Abuelo)</option>
-                <option value="Lic. Andrea Estefanía Ruiz (Titular — SIPPINA)">Lic. Andrea Estefanía Ruiz (SIPPINA)</option>
-                <option value="Lic. Iván Arturo Delgado (Procurador)">Lic. Iván Arturo Delgado (Procuraduría)</option>
-                <option value="Psic. Mariana Lozano Pérez (Psicología)">Psic. Mariana Lozano Pérez (Psicología)</option>
-                <option value="C. Lucía Margarita Peña (Dirección DIF)">C. Lucía Margarita Peña (Presidencia / Dirección DIF)</option>
-                <option value="C. Norma Alicia Vázquez (Coordinación DIF)">C. Norma Alicia Vázquez (Oficinas / Recepción DIF)</option>
-                <option value="Psic. Brenda Liliana Cortés (Psicoterapia DIF)">Psic. Brenda Liliana Cortés (Psicoterapia DIF)</option>
-                <option value="Dra. Cintia Nayeli Romero (Dentista DIF)">Dra. Cintia Nayeli Romero (Consultorio Dentista DIF)</option>
-                <option value="Ing. César Augusto Alvarado (Dir. Obras Públicas)">Ing. César Augusto Alvarado (Obras Públicas)</option>
-                <option value="Arq. Diana Carolina Ochoa (Jefa — Des. Urbano)">Arq. Diana Carolina Ochoa (Desarrollo Urbano)</option>
-                <option value="C. Sergio Arturo Maldonado (Jefe — Serv. Municipales)">C. Sergio Arturo Maldonado (Servicios Municipales)</option>
-                <option value="Biol. Ernesto Alonso Vargas (Jefe — Serv. Ambientales)">Biol. Ernesto Alonso Vargas (Servicios Ambientales)</option>
-                <option value="C. Raúl Esteban Figueroa (Jefe — Comercio)">C. Raúl Esteban Figueroa (Comercio)</option>
-                <option value="Lic. Paulina Montserrat Silva (Jefa — Turismo)">Lic. Paulina Montserrat Silva (Turismo)</option>
-                <option value="Cmdte. Javier Omar Espinoza (Dir. Protección Civil)">Cmdte. Javier Omar Espinoza (Protección Civil)</option>
-                <option value="Lic. Adriana Isabel Ponce (Oficial — Registro Civil)">Lic. Adriana Isabel Ponce (Registro Civil)</option>
-                <option value="C. Marco Antonio Cabrera (Jefe — Transporte)">C. Marco Antonio Cabrera (Transporte Vehicular)</option>
-                <option value="C. Martín Gerardo Zamora (Encargado — Panteón)">C. Martín Gerardo Zamora (Panteón)</option>
-                <option value="Profra. Silvia Elena Lara (Encargada — Bibliotecas)">Profra. Silvia Elena Lara (Biblioteca / 21 de Marzo)</option>
-                <option value="C. Óscar Daniel Sandoval (Encargado — Auditorio MT)">C. Óscar Daniel Sandoval (Auditorio MT)</option>
-                <option value="Prof. Luis Enrique Chávez (Encargado — Deportivo)">Prof. Luis Enrique Chávez (Deportivo Vicente Guerrero)</option>
-                <option value="C. Karla Beatriz Mendoza (Encargada — Ameyal)">C. Karla Beatriz Mendoza (Ameyal)</option>
-                <option value="Ing. José Manuel Trujillo (Jefe — Sistemas)">Ing. José Manuel Trujillo (Sistemas)</option>
-                <option value="Lic. Rodrigo Sebastián León (Jefe — Com. Social)">Lic. Rodrigo Sebastián León (Comunicación Social)</option>
-                <option value="Loc. Gerardo Iván Montes (Cabina de Radio)">Loc. Gerardo Iván Montes (Cabina de Radio)</option>
-              </optgroup>
-
-              <optgroup label="Otro / Personalizado">
-                <option value="OTRA">Otra persona / Especificar nombre</option>
-              </optgroup>
+            <div class="label-row">
+              <label for="persona-solicitante">2. Nombre del Solicitante <span class="req">*</span></label>
+              <button
+                type="button"
+                id="btn-editar-catalogo-inline"
+                class="link-action oculto"
+                title="Modificar nombre, puesto o agregar personal en esta área"
+              >
+                Editar directorio de área
+              </button>
+            </div>
+            <select id="persona-solicitante" disabled required>
+              <option value="">-- Primero selecciona un área --</option>
             </select>
-            <small class="error-msg" id="err-persona">Selecciona quién solicita o especifica su nombre.</small>
+            <small class="error-msg">Selecciona o especifica quién solicita el servicio.</small>
           </div>
 
-          <!-- Campo libre obligatorio si elige 'Otra persona / Especificar nombre' -->
-          <div class="form-group oculto" id="grupo-otra-persona">
-            <label for="otra-persona-texto">Nombre de la Persona Solicitante <span class="req">*</span></label>
-            <input
-              type="text"
-              id="otra-persona-texto"
-              placeholder="Ej. Lic. Juan Pérez / Auxiliar Sindical / Practicante..."
-            />
-            <small class="error-msg" id="err-otra-persona">Escribe el nombre o puesto de la persona.</small>
+          <!-- Tarjeta Automática: Puesto y Tipo del Solicitante Seleccionado -->
+          <div id="ficha-persona-seleccionada" class="person-info-card oculto" aria-live="polite">
+            <div class="person-info-header">
+              <span class="person-info-title">Datos capturados del solicitante</span>
+              <button
+                type="button"
+                id="btn-modificar-persona-actual"
+                class="btn-xs-edit"
+                title="Cambiar nombre si hubo relevo o estaba SIN NOMBRE"
+              >
+                Editar datos
+              </button>
+            </div>
+            <div class="person-info-grid">
+              <div class="person-info-item">
+                <span class="info-tag">Nombre:</span>
+                <strong id="detalle-nombre">—</strong>
+              </div>
+              <div class="person-info-item">
+                <span class="info-tag">Puesto:</span>
+                <strong id="detalle-puesto">—</strong>
+              </div>
+              <div class="person-info-item">
+                <span class="info-tag">Tipo / Plaza:</span>
+                <span id="detalle-tipo" class="badge-plaza">—</span>
+              </div>
+            </div>
           </div>
 
-          <!-- Fila 4: Equipo Afectado -->
+          <!-- Campo Condicional: Otro Solicitante (Especificar Manualmente) -->
+          <div id="grupo-otra-persona" class="otra-persona-box oculto">
+            <div class="form-group">
+              <label for="otra-persona-texto">Especificar Nombre del Solicitante <span class="req">*</span></label>
+              <input
+                type="text"
+                id="otra-persona-texto"
+                placeholder="Nombre completo o alias del solicitante"
+              />
+              <small class="error-msg">Escribe el nombre de la persona solicitante.</small>
+            </div>
+
+            <div class="form-row-2">
+              <div class="form-group">
+                <label for="otra-persona-puesto">Puesto / Cargo</label>
+                <input
+                  type="text"
+                  id="otra-persona-puesto"
+                  placeholder="Ej. Auxiliar Administrativo"
+                />
+              </div>
+              <div class="form-group">
+                <label for="otra-persona-tipo">Tipo / Plaza</label>
+                <select id="otra-persona-tipo">
+                  <option value="CONFIANZA">CONFIANZA</option>
+                  <option value="SINDICATO">SINDICATO</option>
+                  <option value="PRACTICANTE">PRACTICANTE</option>
+                  <option value="OTRO">OTRO</option>
+                </select>
+              </div>
+            </div>
+
+            <label class="checkbox-inline">
+              <input type="checkbox" id="guardar-en-catalogo" checked />
+              <span>Guardar en el catálogo de esta área para futuras solicitudes</span>
+            </label>
+          </div>
+
+          <!-- Equipo Afectado -->
           <div class="form-group">
             <label for="equipo-afectado">Equipo o Infraestructura Afectada <span class="req">*</span></label>
             <input
@@ -380,11 +344,11 @@
               <option value="Escáner / Multifuncional"></option>
               <option value="Teléfono IP / Conmutador"></option>
             </datalist>
-            <small class="error-msg" id="err-equipo">Indica el equipo o servicio afectado.</small>
+            <small class="error-msg">Indica el equipo o servicio afectado.</small>
           </div>
 
-          <!-- Fila 5 Flexible: Descripción de la Falla -->
-          <div class="form-group form-group-grow">
+          <!-- Descripción de la Falla -->
+          <div class="form-group">
             <label for="descripcion-falla">Descripción de la Falla y Diagnóstico <span class="req">*</span></label>
             <textarea
               id="descripcion-falla"
@@ -392,25 +356,27 @@
               placeholder="Detalla el problema reportado por el usuario y la acción o diagnóstico técnico..."
               required
             ></textarea>
-            <small class="error-msg" id="err-descripcion">Describe la falla reportada.</small>
+            <small class="error-msg">Describe la falla o actividad realizada.</small>
           </div>
 
-          <!-- Fila 6: Botones -->
+          <!-- Botones del Formulario -->
           <div class="form-actions">
-            <button type="button" class="btn btn-secondary" id="btn-limpiar">Limpiar</button>
+            <button type="button" id="btn-limpiar" class="btn btn-secondary">Limpiar</button>
             <button type="submit" class="btn btn-primary">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
                 <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
                 <polyline points="17 21 17 13 7 13 7 21"></polyline>
                 <polyline points="7 3 7 8 15 8"></polyline>
               </svg>
-              Guardar Registro
+              <span>Guardar Registro</span>
             </button>
           </div>
         </form>
       </section>
 
-      <!-- CU-02 y CU-03: Tablero de Seguimiento y Exportación -->
+      <!-- =============================================================== -->
+      <!-- COLUMNA DERECHA: TABLERO DE CONTROL Y SEGUIMIENTO               -->
+      <!-- =============================================================== -->
       <section class="card board-card" aria-labelledby="titulo-tablero">
         <div class="card-header board-header">
           <div>
@@ -420,8 +386,9 @@
             </div>
             <p class="card-subtitle">Consulta, edita, actualiza estados y exporta reportes administrativos</p>
           </div>
-          <button type="button" class="btn btn-excel" id="btn-exportar-excel">
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1">
+
+          <button type="button" id="btn-exportar-excel" class="btn btn-excel">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" aria-hidden="true">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
               <polyline points="14 2 14 8 20 8"></polyline>
               <line x1="8" y1="13" x2="16" y2="17"></line>
@@ -431,7 +398,7 @@
           </button>
         </div>
 
-        <!-- Filtros de Búsqueda -->
+        <!-- Barra de Filtros -->
         <div class="filters-bar">
           <div class="search-box">
             <svg class="search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -441,16 +408,18 @@
             <input
               type="search"
               id="filtro-busqueda"
-              placeholder="Buscar por folio, área, solicitante, equipo o falla..."
+              placeholder="Buscar por folio, área, nombre, puesto, equipo o falla..."
               aria-label="Buscar tareas"
             />
           </div>
+
           <select id="filtro-estado" aria-label="Filtrar por estado">
             <option value="TODOS">Todos los estados</option>
             <option value="Pendiente">Pendiente</option>
             <option value="En proceso">En proceso</option>
             <option value="Terminado">Terminado</option>
           </select>
+
           <select id="filtro-tipo" aria-label="Filtrar por tipo de servicio">
             <option value="TODOS">Hardware y Software</option>
             <option value="Hardware">Solo Hardware</option>
@@ -458,9 +427,9 @@
           </select>
         </div>
 
-        <!-- Aviso de Bandeja Vacía -->
-        <div class="empty-state" id="estado-vacio">
-          <div class="empty-icon-wrap">
+        <!-- Estado Vacío -->
+        <div id="estado-vacio" class="empty-state">
+          <div class="empty-icon-wrap" aria-hidden="true">
             <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
               <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"></path>
               <rect x="9" y="3" width="6" height="4" rx="1"></rect>
@@ -470,17 +439,18 @@
           <p>No hay solicitudes técnicas registradas todavía. Captura el primer reporte en el formulario.</p>
         </div>
 
-        <!-- Tabla con Scroll Interno y los 8 Campos -->
-        <div class="table-wrapper oculto" id="contenedor-tabla">
+        <!-- Tabla de Registros -->
+        <div id="contenedor-tabla" class="table-wrapper oculto">
           <table class="tasks-table">
             <thead>
               <tr>
-                <th>ID</th>
+                <th>Folio</th>
                 <th>Fecha</th>
-                <th>Área Solicitante</th>
+                <th>Área</th>
                 <th>Solicitante</th>
-                <th>Equipo Afectado</th>
-                <th>Tipo</th>
+                <th>Puesto / Tipo</th>
+                <th>Equipo</th>
+                <th>Servicio</th>
                 <th>Descripción de la Falla</th>
                 <th>Estado</th>
                 <th>Acciones</th>
@@ -501,20 +471,24 @@
     </div>
   </footer>
 
-  <!-- Modal 1: Actualizar Estado Rápido -->
-  <div class="modal-backdrop oculto" id="modal-estado" role="dialog" aria-modal="true" aria-labelledby="modal-titulo">
-    <div class="modal-card">
+  <!-- =================================================================== -->
+  <!-- MODAL 1: CAMBIO RÁPIDO DE ESTADO                                    -->
+  <!-- =================================================================== -->
+  <div id="modal-estado" class="modal-backdrop oculto" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-estado">
+    <div class="modal-box modal-sm">
       <div class="modal-header">
-        <h3 id="modal-titulo">Actualizar Estado de Tarea <span id="modal-id-tarea">#</span></h3>
-        <button type="button" class="btn-close" id="btn-cerrar-modal" aria-label="Cerrar">&times;</button>
+        <h3 id="titulo-modal-estado">Actualizar Estado <span id="modal-id-tarea">#1</span></h3>
+        <button type="button" id="btn-cerrar-modal" class="btn-close" aria-label="Cerrar">&times;</button>
       </div>
       <div class="modal-body">
-        <div class="modal-info">
+        <div class="modal-summary">
           <p><strong>Área:</strong> <span id="modal-area"></span></p>
           <p><strong>Solicitante:</strong> <span id="modal-solicitante"></span></p>
+          <p><strong>Puesto / Tipo:</strong> <span id="modal-puesto-tipo"></span></p>
           <p><strong>Equipo:</strong> <span id="modal-equipo"></span></p>
         </div>
-        <div class="form-group" style="margin-bottom: 0;">
+
+        <div class="form-group">
           <label for="select-nuevo-estado">Nuevo Estado de Seguimiento</label>
           <select id="select-nuevo-estado">
             <option value="Pendiente">Pendiente</option>
@@ -524,71 +498,33 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" id="btn-cancelar-estado">Cancelar</button>
-        <button type="button" class="btn btn-primary" id="btn-confirmar-estado">Confirmar Cambio</button>
+        <button type="button" id="btn-cancelar-estado" class="btn btn-secondary">Cancelar</button>
+        <button type="button" id="btn-confirmar-estado" class="btn btn-primary">Guardar Estado</button>
       </div>
     </div>
   </div>
 
-  <!-- Modal 2: Modificar / Editar Registro Completo -->
-  <div class="modal-backdrop oculto" id="modal-editar" role="dialog" aria-modal="true" aria-labelledby="modal-editar-titulo">
-    <div class="modal-card modal-card-lg">
+  <!-- =================================================================== -->
+  <!-- MODAL 2: EDICIÓN COMPLETA DE TAREA                                  -->
+  <!-- =================================================================== -->
+  <div id="modal-editar" class="modal-backdrop oculto" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-editar">
+    <div class="modal-box modal-lg">
       <div class="modal-header">
-        <h3 id="modal-editar-titulo">Modificar Registro <span id="edit-folio-titulo">#</span></h3>
-        <button type="button" class="btn-close" id="btn-cerrar-editar" aria-label="Cerrar">&times;</button>
+        <h3 id="titulo-modal-editar">Editar Registro <span id="edit-folio-titulo">#1</span></h3>
+        <button type="button" id="btn-cerrar-editar" class="btn-close" aria-label="Cerrar">&times;</button>
       </div>
-      <form id="form-editar-tarea" novalidate>
+
+      <form id="form-editar-tarea">
         <div class="modal-body">
-          <div class="form-row-2" style="margin-bottom: 10px;">
-            <div class="form-group" style="margin-bottom: 0;">
-              <label for="edit-fecha">Fecha de Solicitud <span class="req">*</span></label>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="edit-fecha">Fecha de Solicitud</label>
               <input type="date" id="edit-fecha" required />
             </div>
 
-            <div class="form-group" style="margin-bottom: 0;">
-              <label>Tipo de Servicio <span class="req">*</span></label>
-              <div class="radio-cards">
-                <label class="radio-option">
-                  <input type="radio" name="editTipoServicio" value="Hardware" />
-                  <span>Hardware</span>
-                </label>
-                <label class="radio-option">
-                  <input type="radio" name="editTipoServicio" value="Software" />
-                  <span>Software</span>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-group" style="margin-bottom: 10px;">
-            <label for="edit-area">Área o Departamento Solicitante <span class="req">*</span></label>
-            <select id="edit-area" required></select>
-          </div>
-
-          <div class="form-group oculto" id="edit-grupo-otra-area" style="margin-bottom: 10px;">
-            <label for="edit-otra-area-texto">Especificar Nombre del Área <span class="req">*</span></label>
-            <input type="text" id="edit-otra-area-texto" placeholder="Nombre del departamento o comisión" />
-          </div>
-
-          <div class="form-group" style="margin-bottom: 10px;">
-            <label for="edit-persona">Persona / Solicitante <span class="req">*</span></label>
-            <select id="edit-persona" required></select>
-          </div>
-
-          <div class="form-group oculto" id="edit-grupo-otra-persona" style="margin-bottom: 10px;">
-            <label for="edit-otra-persona-texto">Nombre de la Persona Solicitante <span class="req">*</span></label>
-            <input type="text" id="edit-otra-persona-texto" placeholder="Nombre o puesto de la persona" />
-          </div>
-
-          <div class="form-row-2" style="margin-bottom: 10px;">
-            <div class="form-group" style="margin-bottom: 0;">
-              <label for="edit-equipo">Equipo Afectado <span class="req">*</span></label>
-              <input type="text" id="edit-equipo" list="sugerencias-equipos" required />
-            </div>
-
-            <div class="form-group" style="margin-bottom: 0;">
-              <label for="edit-estado">Estado de Seguimiento <span class="req">*</span></label>
-              <select id="edit-estado">
+            <div class="form-group">
+              <label for="edit-estado">Estado de Seguimiento</label>
+              <select id="edit-estado" required>
                 <option value="Pendiente">Pendiente</option>
                 <option value="En proceso">En proceso</option>
                 <option value="Terminado">Terminado</option>
@@ -596,97 +532,247 @@
             </div>
           </div>
 
-          <div class="form-group" style="margin-bottom: 0;">
-            <label for="edit-descripcion">Descripción de la Falla y Diagnóstico <span class="req">*</span></label>
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="edit-area">Área Solicitante</label>
+              <select id="edit-area" required></select>
+            </div>
+
+            <div class="form-group">
+              <label for="edit-persona">Nombre del Solicitante</label>
+              <select id="edit-persona" required></select>
+            </div>
+          </div>
+
+          <div id="edit-grupo-otra-area" class="form-group oculto">
+            <label for="edit-otra-area-texto">Especificar Área</label>
+            <input type="text" id="edit-otra-area-texto" placeholder="Escribe el área" />
+          </div>
+
+          <div id="edit-grupo-otra-persona" class="form-group oculto">
+            <label for="edit-otra-persona-texto">Especificar Nombre del Solicitante</label>
+            <input type="text" id="edit-otra-persona-texto" placeholder="Escribe el nombre" />
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="edit-puesto">Puesto / Cargo</label>
+              <input type="text" id="edit-puesto" placeholder="Puesto del solicitante" />
+            </div>
+
+            <div class="form-group">
+              <label for="edit-tipo-plaza">Tipo / Plaza</label>
+              <select id="edit-tipo-plaza">
+                <option value="CONFIANZA">CONFIANZA</option>
+                <option value="SINDICATO">SINDICATO</option>
+                <option value="PRACTICANTE">PRACTICANTE</option>
+                <option value="OTRO">OTRO</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row-2">
+            <div class="form-group">
+              <label for="edit-equipo">Equipo o Recurso Afectado</label>
+              <input type="text" id="edit-equipo" list="sugerencias-equipos" required />
+            </div>
+
+            <div class="form-group">
+              <label>Tipo de Servicio</label>
+              <div class="radio-group">
+                <label class="radio-card">
+                  <input type="radio" name="editTipoServicio" value="Hardware" />
+                  <span>Hardware</span>
+                </label>
+                <label class="radio-card">
+                  <input type="radio" name="editTipoServicio" value="Software" />
+                  <span>Software</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-descripcion">Descripción de la Falla</label>
             <textarea id="edit-descripcion" rows="3" required></textarea>
           </div>
         </div>
+
         <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" id="btn-cancelar-editar">Cancelar</button>
+          <button type="button" id="btn-cancelar-editar" class="btn btn-secondary">Cancelar</button>
           <button type="submit" class="btn btn-primary">Guardar Cambios</button>
         </div>
       </form>
     </div>
   </div>
 
-  <!-- Modal 3: Confirmar Eliminación (Compatible 100% con Celular y PC) -->
-  <div class="modal-backdrop oculto" id="modal-eliminar" role="dialog" aria-modal="true" aria-labelledby="modal-eliminar-titulo">
-    <div class="modal-card">
+  <!-- =================================================================== -->
+  <!-- MODAL 3: CONFIRMACIÓN DE ELIMINACIÓN                                -->
+  <!-- =================================================================== -->
+  <div id="modal-eliminar" class="modal-backdrop oculto" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-eliminar">
+    <div class="modal-box modal-sm">
       <div class="modal-header modal-header-danger">
-        <h3 id="modal-eliminar-titulo">Eliminar Registro <span id="del-id-tarea">#</span></h3>
-        <button type="button" class="btn-close" id="btn-cerrar-eliminar" aria-label="Cerrar">&times;</button>
+        <h3 id="titulo-modal-eliminar">Eliminar Registro <span id="del-id-tarea">#1</span></h3>
+        <button type="button" id="btn-cerrar-eliminar" class="btn-close" aria-label="Cerrar">&times;</button>
       </div>
       <div class="modal-body">
-        <div class="modal-info">
+        <p class="warning-text">¿Seguro que deseas eliminar permanentemente esta solicitud?</p>
+        <div class="modal-summary">
           <p><strong>Área:</strong> <span id="del-area"></span></p>
           <p><strong>Solicitante:</strong> <span id="del-solicitante"></span></p>
           <p><strong>Equipo:</strong> <span id="del-equipo"></span></p>
         </div>
-        <p class="sync-help" style="margin-bottom: 0;">
-          ¿Seguro que deseas eliminar este registro de forma permanente? Se borrará también de todos los dispositivos sincronizados.
-        </p>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" id="btn-cancelar-eliminar">Cancelar</button>
-        <button type="button" class="btn btn-danger-solid" id="btn-confirmar-eliminar">Sí, Eliminar</button>
+        <button type="button" id="btn-cancelar-eliminar" class="btn btn-secondary">Cancelar</button>
+        <button type="button" id="btn-confirmar-eliminar" class="btn btn-danger-solid">Sí, Eliminar</button>
       </div>
     </div>
   </div>
 
-  <!-- Modal 4: Sincronización Automática Multidispositivo -->
-  <div class="modal-backdrop oculto" id="modal-sync" role="dialog" aria-modal="true" aria-labelledby="modal-sync-titulo">
-    <div class="modal-card">
+  <!-- =================================================================== -->
+  <!-- MODAL 4: GESTIÓN DE DIRECTORIO / CATÁLOGO DE PERSONAL POR ÁREA      -->
+  <!-- =================================================================== -->
+  <div id="modal-catalogo" class="modal-backdrop oculto" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-catalogo">
+    <div class="modal-box modal-lg">
       <div class="modal-header">
-        <h3 id="modal-sync-titulo">Sincronización Automática en Dispositivos</h3>
-        <button type="button" class="btn-close" id="btn-cerrar-sync" aria-label="Cerrar">&times;</button>
+        <div>
+          <h3 id="titulo-modal-catalogo">Directorio de Personal por Área</h3>
+          <p class="modal-subtitle">Actualiza nombres si alguien renuncia, completa registros "SIN NOMBRE" o agrega personal</p>
+        </div>
+        <button type="button" id="btn-cerrar-catalogo" class="btn-close" aria-label="Cerrar">&times;</button>
       </div>
+
       <div class="modal-body">
-        <p class="sync-help">
-          Conecta tu token una vez o usa los botones rápidos para activar tu celular u otro navegador sin escribir nada:
-        </p>
-
-        <div class="form-row-2" style="margin-bottom: 10px;">
-          <div class="form-group" style="margin-bottom: 0;">
-            <label for="sync-owner">Usuario GitHub</label>
-            <input type="text" id="sync-owner" placeholder="Usuario" />
+        <div class="catalog-toolbar">
+          <div class="form-group" style="flex: 1; margin-bottom: 0;">
+            <label for="cat-select-area">Filtrar por Área:</label>
+            <select id="cat-select-area"></select>
           </div>
-          <div class="form-group" style="margin-bottom: 0;">
-            <label for="sync-repo">Repositorio</label>
-            <input type="text" id="sync-repo" placeholder="Repositorio" />
-          </div>
+          <button type="button" id="btn-nuevo-personal-cat" class="btn btn-primary">
+            + Agregar Persona a esta Área
+          </button>
         </div>
 
-        <div class="form-group" style="margin-bottom: 12px;">
-          <label for="sync-token">Token de GitHub (Contents: Read &amp; Write)</label>
-          <input
-            type="password"
-            id="sync-token"
-            placeholder="github_pat_..."
-            autocomplete="off"
-          />
-        </div>
+        <form id="form-catalogo-persona" class="catalog-edit-panel oculto">
+          <h4 id="titulo-form-cat">Editar Datos del Personal</h4>
+          <input type="hidden" id="cat-edit-index" value="-1" />
 
-        <div class="sync-share-box oculto" id="caja-compartir-sync">
-          <p class="sync-share-title">Acceso automático en otros dispositivos:</p>
-          <div class="sync-share-btns">
-            <button type="button" class="btn btn-secondary btn-xs" id="btn-copiar-enlace-sync">
-              Copiar enlace directo p/ Celular
-            </button>
-            <button type="button" class="btn btn-secondary btn-xs" id="btn-copiar-clave-codigo">
-              Copiar clave codificada p/ app.js
-            </button>
+          <div class="form-row-3">
+            <div class="form-group">
+              <label for="cat-nombre">Nombre Completo <span class="req">*</span></label>
+              <input
+                type="text"
+                id="cat-nombre"
+                placeholder="Ej. JUAN PÉREZ o SIN NOMBRE"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="cat-puesto">Puesto / Cargo <span class="req">*</span></label>
+              <input
+                type="text"
+                id="cat-puesto"
+                placeholder="Ej. AUX COMERCIO"
+                required
+              />
+            </div>
+
+            <div class="form-group">
+              <label for="cat-tipo">Tipo / Plaza <span class="req">*</span></label>
+              <select id="cat-tipo" required>
+                <option value="CONFIANZA">CONFIANZA</option>
+                <option value="SINDICATO">SINDICATO</option>
+                <option value="PRACTICANTE">PRACTICANTE</option>
+                <option value="OTRO">OTRO</option>
+              </select>
+            </div>
           </div>
+
+          <div class="catalog-form-actions">
+            <button type="button" id="btn-cancelar-form-cat" class="btn btn-secondary">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar en Catálogo</button>
+          </div>
+        </form>
+
+        <div class="catalog-table-wrapper">
+          <table class="catalog-table">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Puesto</th>
+                <th>Tipo / Plaza</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="cat-lista-personal"></tbody>
+          </table>
         </div>
       </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" id="btn-cancelar-sync">Cancelar</button>
-        <button type="button" class="btn btn-primary" id="btn-guardar-sync">Guardar y Conectar</button>
+
+      <div class="modal-footer modal-footer-between">
+        <button
+          type="button"
+          id="btn-restaurar-catalogo"
+          class="btn btn-secondary"
+          title="Restaura la lista original del archivo NOMBRES.xlsx"
+        >
+          Restaurar lista base
+        </button>
+        <button type="button" id="btn-cerrar-catalogo-footer" class="btn btn-primary">Listo</button>
       </div>
     </div>
   </div>
 
-  <!-- Notificación Flotante (Toast) -->
-  <div class="toast-container" id="toast-container" aria-live="polite"></div>
+  <!-- =================================================================== -->
+  <!-- MODAL 5: SINCRONIZACIÓN CON GITHUB                                  -->
+  <!-- =================================================================== -->
+  <div id="modal-sync" class="modal-backdrop oculto" role="dialog" aria-modal="true" aria-labelledby="titulo-modal-sync">
+    <div class="modal-box modal-sm">
+      <div class="modal-header">
+        <h3 id="titulo-modal-sync">Sincronización en la Nube (GitHub)</h3>
+        <button type="button" id="btn-cerrar-sync" class="btn-close" aria-label="Cerrar">&times;</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="sync-owner">Usuario / Organización GitHub</label>
+          <input type="text" id="sync-owner" placeholder="OswaldoOR" />
+        </div>
+
+        <div class="form-group">
+          <label for="sync-repo">Repositorio</label>
+          <input type="text" id="sync-repo" placeholder="prueba1" />
+        </div>
+
+        <div class="form-group">
+          <label for="sync-token">Token Personal de Acceso (PAT)</label>
+          <input type="password" id="sync-token" placeholder="github_pat_..." autocomplete="off" />
+        </div>
+
+        <div id="caja-compartir-sync" class="share-sync-box oculto">
+          <p>Vincular otro dispositivo (celular o PC):</p>
+          <div class="share-btns">
+            <button type="button" id="btn-copiar-enlace-sync" class="btn btn-secondary btn-sm-full">
+              Copiar enlace rápido
+            </button>
+            <button type="button" id="btn-copiar-clave-codigo" class="btn btn-secondary btn-sm-full">
+              Copiar clave codificada
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" id="btn-cancelar-sync" class="btn btn-secondary">Cancelar</button>
+        <button type="button" id="btn-guardar-sync" class="btn btn-primary">Guardar y Sincronizar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTENEDOR DE NOTIFICACIONES TOAST -->
+  <div id="toast-container" class="toast-container" aria-live="polite"></div>
 
   <script src="js/app.js"></script>
 </body>
