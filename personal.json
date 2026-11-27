@@ -1,0 +1,804 @@
+{
+  "PRESIDENCIA": [
+    {
+      "nombre": "JOSE ANTONIO MAY",
+      "puesto": "PRESIDENCIA",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "AMANDO",
+      "puesto": "SECRETARIO DE PRESIDENCIA",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "LIZ",
+      "puesto": "ASISTENTE PRESIDENCIA",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "KATY",
+      "puesto": "MONITORISTA 1",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "SIN NOMBRE",
+      "puesto": "MONITORISTA 2",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "LUCERO",
+      "puesto": "RECEPCION",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "JUAN PEREZ",
+      "puesto": "AUX PRUEBA",
+      "tipo": "PRACTICANTE"
+    }
+  ],
+  "SECRETARIO": [
+    {
+      "nombre": "URIEL",
+      "puesto": "SECRETARIO",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "RODOLFO",
+      "puesto": "SECRE DEL SECRE DEL AYUN",
+      "tipo": "SINDICATO"
+    },
+    {
+      "nombre": "AUX1",
+      "puesto": "AUX SECRETARIO",
+      "tipo": "PRACTICANTE"
+    }
+  ],
+  "REGIDURIAS": [
+    {
+      "nombre": "REG 1 ARLETH JIMNEZ",
+      "puesto": "REGIDORA 1",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "REG 2 JORGE HDZ",
+      "puesto": "REGIDOR 2",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "REG 3 ALEYDA RODRIGUEZ",
+      "puesto": "REGIDORA 3",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "REG 4 AIKO MARTINEZ",
+      "puesto": "REGIDORA 4",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "REG 5 CESAR ALCARAZ",
+      "puesto": "REGIDOR 5",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "REG 6 FRED OLIVARES",
+      "puesto": "REGIDOR 6",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "CRISTINA",
+      "puesto": "AUX REG / SECRETARIA",
+      "tipo": "SINDICATO"
+    },
+    {
+      "nombre": "PATY",
+      "puesto": "AUX REG / SECRETARIA",
+      "tipo": "SINDICATO"
+    },
+    {
+      "nombre": "CLAUDIA CAMPOS",
+      "puesto": "AUX REG / SECRETARIA",
+      "tipo": "SINDICATO"
+    },
+    {
+      "nombre": "GUADALUPE ALVARADO",
+      "puesto": "AUX REG / SECRETARIA",
+      "tipo": "SINDICATO"
+    },
+    {
+      "nombre": "PILAR",
+      "puesto": "AUX REG / SECRETARIA",
+      "tipo": "SINDICATO"
+    },
+    {
+      "nombre": "ELIZETH",
+      "puesto": "AUX REG / SECRETARIA",
+      "tipo": "SINDICATO"
+    }
+  ],
+  "TESORERIA": [
+    {
+      "nombre": "MARCO SANCHEZ",
+      "puesto": "TESORERO",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "JENY",
+      "puesto": "AUX TESORERIA",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "ISA",
+      "puesto": "SECRE TESO",
+      "tipo": "SINDICATO"
+    }
+  ],
+  "CONTADURIA": [
+    {
+      "nombre": "ANGEL DE JESUS",
+      "puesto": "CONTRALOR",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "DANIELA",
+      "puesto": "AUX",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "AUX1",
+      "puesto": "AUX CONTADURIA",
+      "tipo": "PRACTICANTE"
+    }
+  ],
+  "COMUNICACIÓN": [
+    {
+      "nombre": "CRISTIAN LOPEZ",
+      "puesto": "DIRECTOR COMUNI. DIG.",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "GUILLERMO CARREON",
+      "puesto": "COMUN. SOCIAL",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "GERSON",
+      "puesto": "AUX COMUN. SOCIAL",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "AUX1",
+      "puesto": "AUX COMUN. SOCIAL",
+      "tipo": "PRACTICANTE"
+    },
+    {
+      "nombre": "AUX2",
+      "puesto": "AUX COMUN. SOCIAL",
+      "tipo": "PRACTICANTE"
+    }
+  ],
+  "JURIDICO": [
+    {
+      "nombre": "ELOY BAROJAS",
+      "puesto": "TITULAR JURIDICO",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "USUARIO",
+      "puesto": "AUX JURIDICO",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "AUX1",
+      "puesto": "AUX JURIDICO",
+      "tipo": "PRACTICANTE"
+    }
+  ],
+  "INMUJER": [
+    {
+      "nombre": "TERESITA DE JESUS",
+      "puesto": "DIRECTORA",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "ADAMARY",
+      "puesto": "AUX INMUJER",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "AUX2",
+      "puesto": "AUX INMUJER",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "LIZ",
+      "puesto": "PSICOLOGA",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "JOSE ANGEL",
+      "puesto": "ABOGADO INMUJER",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "JUAN MANUEL REYES",
+      "puesto": "TITULAR SIPINNA",
+      "tipo": "CONFIANZA"
+    }
+  ],
+  "TRANSPARENCIA": [
+    {
+      "nombre": "JAVIER SHETINNO",
+      "puesto": "TITULAR TRANSPARENCIA",
+      "tipo": "CONFIANZA"
+    }
+  ],
+  "SISTEMAS": [
+    {
+      "nombre": "RODOLFO ZAMORA",
+      "puesto": "TITULAR SISTEMAS",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "AUX1",
+      "puesto": "AUX",
+      "tipo": "PRACTICANTE"
+    }
+  ],
+  "OBRAS PUBLICAS": [
+    {
+      "nombre": "CARLOS GARCIA",
+      "puesto": "DIREC. OBRAS PUB.",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "RIGOBERTO ALELUYA",
+      "puesto": "AUX OBRAS PUBLICAS",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "USUARIO 1",
+      "puesto": "INSPECTOR DE OBRA",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "USUARIO 2",
+      "puesto": "INSPECTOR DE OBRA",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "ROBERTO CID",
+      "puesto": "RAMOS 033",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "WALDO TORNELL",
+      "puesto": "TITULAR DESARROLLO URBANO",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "KARLA",
+      "puesto": "AUX DESA. URB.",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "AUX 1",
+      "puesto": "AUX DESA. URB.",
+      "tipo": "PRACTICANTE"
+    },
+    {
+      "nombre": "VICTOR BERNAL",
+      "puesto": "ASISTENTE DES. URB.",
+      "tipo": "SINDICATO"
+    },
+    {
+      "nombre": "GIOVANNI",
+      "puesto": "AUX OBRAS PUBLICAS",
+      "tipo": "SINDICATO"
+    },
+    {
+      "nombre": "VERONICA",
+      "puesto": "AUX OBRAS PUBLICAS",
+      "tipo": "SINDICATO"
+    },
+    {
+      "nombre": "AUX 2",
+      "puesto": "AUX OBRAS PUBLICAS",
+      "tipo": "PRACTICANTE"
+    },
+    {
+      "nombre": "ESVEIDY",
+      "puesto": "RECEPCION OBRAS PUB.",
+      "tipo": "SINDICATO"
+    },
+    {
+      "nombre": "DELFINO",
+      "puesto": "RECEPCION OBRAS PUB.",
+      "tipo": "SINDICATO"
+    }
+  ],
+  "DESARROLLO ECONOMICO Y COMERCIO": [
+    {
+      "nombre": "JESUS BLASS",
+      "puesto": "DIREC. COMERCIO",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "SIN NOMBRE",
+      "puesto": "AUX COMERCIO",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "ULISES",
+      "puesto": "ASISTENTE DE COMERCIO",
+      "tipo": "SINDICATO"
+    },
+    {
+      "nombre": "SIN NOMBRE",
+      "puesto": "ENCARGADA MERCADO",
+      "tipo": "CONFIANZA"
+    }
+  ],
+  "CONTABILIDAD": [
+    {
+      "nombre": "SERBANDO",
+      "puesto": "TITULAR CONTABILIDAD",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "SIN NOMBRE",
+      "puesto": "AUX CONTABILIDAD",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "DANIELA",
+      "puesto": "AUX CONTABILIDAD",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "AUX1",
+      "puesto": "AUX CONTABILIDAD",
+      "tipo": "PRACTICANTE"
+    }
+  ],
+  "RRHH": [
+    {
+      "nombre": "ERIKA",
+      "puesto": "TITULAR RRHH",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "ANELY",
+      "puesto": "AUX RRHH",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "AUX1",
+      "puesto": "AUX RRHH",
+      "tipo": "PRACTICANTE"
+    }
+  ],
+  "PROVEEDURIA": [
+    {
+      "nombre": "KARINA",
+      "puesto": "TITULAR PROVEEDURIA",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "ANGELICA",
+      "puesto": "AUX PROVEEDURIA",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "PABLO",
+      "puesto": "AUX PROVEEDURIA",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "LUIS",
+      "puesto": "AUX PROVEEDURIA",
+      "tipo": "CONFIANZA"
+    }
+  ],
+  "SINDICATURA": [
+    {
+      "nombre": "AIDE CRUZ",
+      "puesto": "SINDICO",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "DIANA AUX2",
+      "puesto": "SINDICO",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "INGRID AUX1",
+      "puesto": "SINDICO",
+      "tipo": "CONFIANZA"
+    }
+  ],
+  "CATASTRO": [
+    {
+      "nombre": "ANGEL RGUEZ",
+      "puesto": "TITULAR CATASTRO",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "USUARIO 1G",
+      "puesto": "AUX CATASTRO",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "USUARIO 2A",
+      "puesto": "AUX CATASTRO",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "USUARIO 3P",
+      "puesto": "AUX CATASTRO",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "NADIA",
+      "puesto": "ASISTENTE SINDICATO",
+      "tipo": "SINDICATO"
+    }
+  ],
+  "INGRESOS": [
+    {
+      "nombre": "GOYITA BRENIS",
+      "puesto": "TITULAR INGRESOS",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "SIN NOMBRE (AUX1)",
+      "puesto": "ASISTENTE INGRESOS",
+      "tipo": "PRACTICANTE"
+    },
+    {
+      "nombre": "SIN NOMBRE",
+      "puesto": "CAJA 1",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "ALEYRA",
+      "puesto": "CAJA 2",
+      "tipo": "SINDICATO"
+    },
+    {
+      "nombre": "USUARIO 3",
+      "puesto": "CAJA 3",
+      "tipo": "SINDICATO"
+    },
+    {
+      "nombre": "USUARIO 4",
+      "puesto": "CAJA 4",
+      "tipo": "SINDICATO"
+    },
+    {
+      "nombre": "USUARIO 5",
+      "puesto": "CAJA 5",
+      "tipo": "SINDICATO"
+    },
+    {
+      "nombre": "AUX2",
+      "puesto": "AUX INGRESOS",
+      "tipo": "PRACTICANTE"
+    },
+    {
+      "nombre": "AUX3",
+      "puesto": "AUX INGRESOS",
+      "tipo": "PRACTICANTE"
+    }
+  ],
+  "EGRESOS": [
+    {
+      "nombre": "JUDITH SOLANO",
+      "puesto": "TITULAR EGRESOS",
+      "tipo": "CONFIANZA"
+    }
+  ],
+  "TRANSPORTE": [
+    {
+      "nombre": "SARA",
+      "puesto": "TITULAR TRANSPORTE",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "JORGE MARIN",
+      "puesto": "ENCARGADO PARQ.",
+      "tipo": "CONFIANZA"
+    }
+  ],
+  "DESARROLLO SOCIAL Y HUMANO": [
+    {
+      "nombre": "ELIZABETH CANTERO",
+      "puesto": "DIRECTORA DESARROLLO SOC.",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "PAULO",
+      "puesto": "COORD. DEPORTE",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "OSCAR",
+      "puesto": "COORD. SALUD",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "ANGEL OSORIO",
+      "puesto": "COORD. SALUD ANIMAL",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "VICTOR GTZ",
+      "puesto": "COORD. TURISMO",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "BELEN MERINO",
+      "puesto": "COORD. JUVENTUD",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "GABRIEL BELLO",
+      "puesto": "COORD. EDUCACION",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "CLEMENTINA",
+      "puesto": "ENCARGADA BIBLIOTECA 1",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "IRMA",
+      "puesto": "AUX BIBLIOTECA",
+      "tipo": "SINDICATO"
+    },
+    {
+      "nombre": "RODRIGO",
+      "puesto": "AUX DEPORTE",
+      "tipo": "CONFIANZA"
+    }
+  ],
+  "SERVICIOS MUNICIPALES": [
+    {
+      "nombre": "ORESTES RUIZ",
+      "puesto": "DIREC. SERV. HUMANOS",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "SIN NOMBRE",
+      "puesto": "AUX SERV. MUNICIPALES",
+      "tipo": "CONFIANZA"
+    }
+  ],
+  "SERVICIOS AMBIENTALES": [
+    {
+      "nombre": "QUERORIMI",
+      "puesto": "DIREC. SERV. AMBIENTALES",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "MARY",
+      "puesto": "AUX SERV. AMBIENTALES",
+      "tipo": "CONFIANZA"
+    }
+  ],
+  "PROTECCION CIVIL": [
+    {
+      "nombre": "RAFAEL GARCIA",
+      "puesto": "DIREC. PC",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "USUARIO 1",
+      "puesto": "AUX PC",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "USUARIO 2",
+      "puesto": "AUX PC",
+      "tipo": "CONFIANZA"
+    }
+  ],
+  "PANTEON": [
+    {
+      "nombre": "PREFECTO",
+      "puesto": "ENCARGADO PANTEON",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "SIN NOMBRE",
+      "puesto": "ASISTENTE PANTEON",
+      "tipo": "SINDICATO"
+    },
+    {
+      "nombre": "ALVARO",
+      "puesto": "CAJA PANTEON",
+      "tipo": "SINDICATO"
+    }
+  ],
+  "GOBERNACION": [
+    {
+      "nombre": "CRISTIAN MADRID",
+      "puesto": "DIREC. GOBERNACION",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "JESUS MARIN",
+      "puesto": "AUX GOBERNACION",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "JASSEL",
+      "puesto": "AUX GOBERNACION",
+      "tipo": "CONFIANZA"
+    }
+  ],
+  "PARTICIPACION CIUDADANA": [
+    {
+      "nombre": "LUZ MARIA",
+      "puesto": "DIREC PARTICIPACION",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "SIN NOMBRE",
+      "puesto": "AUX PARTICIPACION",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "SHIRLEY",
+      "puesto": "AUX PARTICIPACION",
+      "tipo": "CONFIANZA"
+    }
+  ],
+  "REGISTRO CIVIL": [
+    {
+      "nombre": "HEBER TECA",
+      "puesto": "OFICIAL RC",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "LUCERO",
+      "puesto": "AUX RC",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "VERONICA",
+      "puesto": "ASISTENTE RC",
+      "tipo": "SINDICATO"
+    },
+    {
+      "nombre": "BLANCA",
+      "puesto": "ASISTENTE RC",
+      "tipo": "SINDICATO"
+    },
+    {
+      "nombre": "SUPLENTE",
+      "puesto": "ASISTENTE RC",
+      "tipo": "SINDICATO"
+    },
+    {
+      "nombre": "JOSE LUIS",
+      "puesto": "ASISTENTE RC",
+      "tipo": "SINDICATO"
+    },
+    {
+      "nombre": "FABIOLA",
+      "puesto": "CAJA RC",
+      "tipo": "SINDICATO"
+    }
+  ],
+  "PRESIDENCIA DIF": [
+    {
+      "nombre": "GABY RGUEZ",
+      "puesto": "PRESIDENTA DIF",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "MILI",
+      "puesto": "DIREC. DIF",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "CARMEN",
+      "puesto": "AUX1 PRESIDENCIA DIF",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "MONSE VERA",
+      "puesto": "AUX2 PRESIDENCIA DIF",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "SIN NOMBRE",
+      "puesto": "AUX3 PRESIDENCIA DIF",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "ROSI",
+      "puesto": "AUX4 PRESIDENCIA DIF",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "CONCHITA",
+      "puesto": "AUX5 PRESIDENCIA DIF",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "LULA",
+      "puesto": "AUX6 PRESIDENCIA DIF",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "IVONNE",
+      "puesto": "ENCARGADA CAIC",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "USUARIO 1",
+      "puesto": "AUX CAIC",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "SANDRA",
+      "puesto": "ENCARGADA CASA ABUELO",
+      "tipo": "CONFIANZA"
+    }
+  ],
+  "CONSULTORIOS DIF": [
+    {
+      "nombre": "JOSEPH MAY",
+      "puesto": "DR. DIF",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "FANNY",
+      "puesto": "ASISTENTE DR. DIF",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "MELANY",
+      "puesto": "DENTISTA DIF",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "SIN NOMBRE",
+      "puesto": "PSICOLOGA DIF",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "AUX1",
+      "puesto": "AUX PSICOLOGA DIF",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "LENNY",
+      "puesto": "PROCURADORA DIF",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "USUARIO 1",
+      "puesto": "ASISTENTE PROCURADORA DIF",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "KARO",
+      "puesto": "CAJERA DIF",
+      "tipo": "CONFIANZA"
+    },
+    {
+      "nombre": "SIN NOMBRE",
+      "puesto": "FISIOTERAPEUTA DIF",
+      "tipo": "CONFIANZA"
+    }
+  ],
+  "SINDICATO": [
+    {
+      "nombre": "KATIA",
+      "puesto": "SECRETARIA GRAL.",
+      "tipo": "SINDICATO"
+    }
+  ]
+}
